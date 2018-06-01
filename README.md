@@ -43,6 +43,6 @@ If executed, it fails like this:
 
 This means that for the property `i == 42`, *jetCheck* has found and printed a counter-example: it's `0`. Of course, you'll have more complex properties working with more complex data types and generators for them. When a property-based test fails, the usual strategy is to take the printed value and create a regression unit test based on it, which you can then debug and fix.
 
-You can also debug the property-based test itself by using `rechecking` line from the failure message. If it doesn't fail, then your test might have some unnoticed side effects, and you can debug it using more advanced `recheckingIteration` or `withSeed`, as printed in the same message below. 
+You can also debug the property-based test itself by using `rechecking` line from the failure message. If it doesn't fail, then your test might have some unnoticed side effects, and you can debug it using more advanced `recheckingIteration` or `withSeed`, using seeds mentioned in the same message. 
 
 For writing generators and properties, see the documentation of [PropertyChecker](src/main/java/org/jetbrains/jetCheck/PropertyChecker.java) and [Generator](src/main/java/org/jetbrains/jetCheck/Generator.java) methods. For stateful system testing, see [ImperativeCommand](src/main/java/org/jetbrains/jetCheck/ImperativeCommand.java).
