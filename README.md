@@ -11,7 +11,7 @@ jetCheck is a property-based testing library for Java 8+, inspired by [QuickChec
 Some examples of properties:
 * For `sort` function, for every input, the output should contain the same elements, but in the ascending order
 * For any kind of data normalization, executing that normalization again on normalized data should leave the result unchanged
-* If you have a serializer for your data, then for any input, `deserialize(serialize(input))` should be equivalent to `input`.
+* If you have a serializer for your data, then for any input, `deserialize(serialize(input))` should be equivalent to `input`
 * For any random input, your program shouldn't crash
 * Your new shiny super-optimized data structure should behave the same way as the old time-proven one
 * Incrementally updating a data structure on changes in the input should be equivalent to building it anew from the input
