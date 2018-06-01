@@ -55,7 +55,7 @@ public interface PropertyFailure<T> {
 
     /**
      * @return the data used for generator to produce this counterexample, serialized into Base64.
-     * To be used with PropertyChecker#rechecking or ImperativeCommand#checkScenario
+     * To be used with {@link PropertyChecker#rechecking} or {@link ImperativeCommand#checkScenario}
      */
     @NotNull
     String getSerializedData();
