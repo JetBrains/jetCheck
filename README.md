@@ -4,6 +4,8 @@ jetCheck is a property-based testing library for Java 8+, inspired by [QuickChec
 * Automatic example minimization: you don't need to manually write shrinkers for your custom data types 
 * Stateful system testing (single-threaded): you can generate a sequence of commands, and each command generation may depend on the state that previous commands have brought the system into.
 
+The library is by no means supposed to be feature-complete, and might lack even very basic data generators, if no clients have needed them yet. Improvement suggestions are welcome. 
+
 # What's property-based testing
 
 "Property-based testing" means that the library checks very general properties that a program should have, as opposed to specific scenarios in unit testing. In *jetCheck*, a number of random test cases are generated, the property is verified on those test cases, and, if it fails, the test case is automatically minimized and printed.
