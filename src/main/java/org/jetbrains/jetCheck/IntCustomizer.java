@@ -22,53 +22,46 @@ interface IntCustomizer {
 }
 
 class CombinatorialIntCustomizer implements IntCustomizer {
-  private final LinkedHashMap<NodeId, Set<Integer>> valuesToTry;
-  private final Map<NodeId, Integer> currentCombination;
-  private final Map<NodeId, IntDistribution> changedDistributions = new HashMap<>();
+  private final DecisionNode root;
+  private DecisionNode currentNode;
 
   CombinatorialIntCustomizer() {
-    this(new LinkedHashMap<>(), new HashMap<>());
+    this(new DecisionNode(null, null));
   }
 
-  private CombinatorialIntCustomizer(LinkedHashMap<NodeId, Set<Integer>> valuesToTry, Map<NodeId, Integer> currentCombination) {
-    this.valuesToTry = valuesToTry;
-    this.currentCombination = currentCombination;
+  private CombinatorialIntCustomizer(DecisionNode root) {
+    this.root = currentNode = root;
   }
 
   public int suggestInt(IntData data, IntDistribution currentDistribution) {
-    if (data.distribution instanceof BoundedIntDistribution &&
-        currentDistribution instanceof BoundedIntDistribution &&
-        registerDifferentRange(data, (BoundedIntDistribution)currentDistribution, (BoundedIntDistribution)data.distribution)) {
-      return suggestCombinatorialVariant(data, currentDistribution);
+    if (data.distribution instanceof BoundedIntDistribution && currentDistribution instanceof BoundedIntDistribution) {
+      Integer value = suggestCombinatorialVariant(data,
+              (BoundedIntDistribution)currentDistribution,
+              (BoundedIntDistribution)data.distribution);
+      if (value != null) {
+        return value;
+      }
     }
     return IntCustomizer.checkValidInt(data, currentDistribution);
   }
 
-  private int suggestCombinatorialVariant(IntData data, IntDistribution currentDistribution) {
-    int value = currentCombination.computeIfAbsent(data.id, __ -> valuesToTry.get(data.id).iterator().next());
-    if (currentDistribution.isValidValue(value)) {
-      return value;
-    }
-
-    throw new CannotRestoreValue();
-  }
-
-  private boolean registerDifferentRange(IntData data, BoundedIntDistribution current, BoundedIntDistribution original) {
-    if (currentCombination.containsKey(data.id)) {
-      changedDistributions.put(data.id, current);
-      return true;
-    }
-
+  private Integer suggestCombinatorialVariant(IntData data, BoundedIntDistribution current, BoundedIntDistribution original) {
     if (original.getMax() != current.getMax() || original.getMin() != current.getMin()) {
       LinkedHashSet<Integer> possibleValues = getPossibleValues(data, current, original);
       if (!possibleValues.isEmpty()) {
-        assert !valuesToTry.containsKey(data.id);
-        valuesToTry.put(data.id, possibleValues);
-        changedDistributions.put(data.id, current);
-        return true;
+        if (possibleValues.size() == 1) return possibleValues.iterator().next();
+
+        if (currentNode.branches == null) {
+          currentNode.branches = new LinkedHashMap<>();
+          possibleValues.forEach(i -> currentNode.branches.put(i, new DecisionNode(currentNode, new IntData(data.id, i, current))));
+        }
+        Integer next = currentNode.branches.keySet().iterator().next();
+        currentNode = currentNode.branches.get(next);
+        assert currentNode != null;
+        return next;
       }
     }
-    return false;
+    return null;
   }
 
   private LinkedHashSet<Integer> getPossibleValues(IntData data, BoundedIntDistribution current, BoundedIntDistribution original) {
@@ -89,45 +82,64 @@ class CombinatorialIntCustomizer implements IntCustomizer {
       }
     }
     possibleValues.add(data.value);
-    
+
     return possibleValues.stream()
-                         .map(value -> Math.min(Math.max(value, current.getMin()), current.getMax()))
-                         .filter(current::isValidValue)
-                         .collect(Collectors.toCollection(LinkedHashSet::new));
+            .map(value -> Math.min(Math.max(value, current.getMin()), current.getMax()))
+            .filter(current::isValidValue)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   private boolean tooManyCombinations() {
-    return valuesToTry.values().stream().filter(s -> s.size() > 1).count() > 3;
+    return currentNode.depth > 3;
   }
 
   @Nullable
   CombinatorialIntCustomizer nextAttempt() {
-    Map<NodeId, Integer> nextCombination = new HashMap<>(currentCombination);
-    for (Map.Entry<NodeId, Set<Integer>> entry : valuesToTry.entrySet()) {
-      List<Integer> possibleValues = new ArrayList<>(entry.getValue());
-      Integer usedValue = currentCombination.get(entry.getKey());
-      int index = possibleValues.indexOf(usedValue);
-      if (index < possibleValues.size() - 1) {
-        // found a position which can be incremented by 1
-        nextCombination.put(entry.getKey(), possibleValues.get(index + 1));
-        return new CombinatorialIntCustomizer(valuesToTry, nextCombination);
-      }
-      // digit overflow in this position, so zero it and try incrementing the next one
-      nextCombination.put(entry.getKey(), possibleValues.get(0));
-    }
-    return null;
+    currentNode.delete();
+    return root.branches == null || root.branches.isEmpty() ? null : new CombinatorialIntCustomizer(root);
   }
 
   StructureNode writeChanges(StructureNode node) {
     StructureNode result = node;
-    for (Map.Entry<NodeId, IntDistribution> entry : changedDistributions.entrySet()) {
-      NodeId id = entry.getKey();
-      result = result.replace(id, new IntData(id, currentCombination.get(id), entry.getValue()));
+    DecisionNode decision = currentNode;
+    while (decision != null) {
+      IntData choice = decision.lastChoice;
+      if (choice != null) {
+        result = result.replace(choice.id, choice);
+      }
+      decision = decision.parent;
     }
     return result;
   }
 
   int countVariants() {
-    return valuesToTry.values().stream().mapToInt(Set::size).reduce(1, (a, b) -> a*b);
+    int result = 1;
+    DecisionNode decision = currentNode;
+    while (decision != null) {
+      result *= Math.max(1, decision.branches == null ? 1 : decision.branches.size());
+      decision = decision.parent;
+    }
+    return result;
+  }
+
+  private static class DecisionNode {
+    @Nullable final DecisionNode parent;
+    final int depth;
+    final IntData lastChoice;
+    Map<Integer, DecisionNode> branches;
+
+    DecisionNode(@Nullable DecisionNode parent, IntData choice) {
+      this.parent = parent;
+      this.lastChoice = choice;
+      depth = parent == null ? 1 : parent.depth + 1;
+    }
+
+    void delete() {
+      if (parent == null) return;
+      parent.branches.values().remove(this);
+      if (parent.branches.isEmpty()) {
+        parent.delete();
+      }
+    }
   }
 }
