@@ -2,6 +2,7 @@
  
 jetCheck is a property-based testing library for Java 8+, inspired by [QuickCheck](https://en.wikipedia.org/wiki/QuickCheck) and [Hypothesis](https://hypothesis.works/). Its distinguishing features are:
 * Automatic example minimization: you don't need to manually write shrinkers for your custom data types 
+* Re-running of minimized test example: once you've got a failing test, you can re-run (and debug) it without all the intermediate minimization steps
 * Stateful system testing (single-threaded): you can generate a sequence of commands, and each command generation may depend on the state that previous commands have brought the system into.
 
 The library is by no means supposed to be feature-complete, and might lack even very basic data generators, if no clients have needed them yet. Improvement suggestions are welcome. 
@@ -22,7 +23,7 @@ In [IntelliJ IDEA](https://github.com/JetBrains/intellij-community) and some oth
 * lexer/parser never fail on any text, however broken
 * incremental lexer and parser results are consistent with full lexing/parsing 
 * code completion suggests whatever you want to write, doesn't contain duplicates and doesn't fail
-* automatic code transformations don't fail, don't break compilation and don't remove valuable comments
+* automatic code transformations don't fail, don't break compilation, don't change in presence of extra parentheses, and don't remove valuable comments
 * all internal representations (of which there's many) built for code are always synchronized
 * sorting algorithms used for completion and Project View obey transitivity contracts
 * and other things
