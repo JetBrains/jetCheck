@@ -15,7 +15,7 @@ class Scenario {
   private final List<Object> log = new ArrayList<>();
   private Throwable failure;
 
-  Scenario(@NotNull ImperativeCommand cmd, @NotNull DataStructure data) {
+  private Scenario(@NotNull ImperativeCommand cmd, @NotNull DataStructure data) {
     try {
       performCommand(cmd, data, log);
     }
@@ -25,8 +25,8 @@ class Scenario {
     catch (Throwable e) {
       addFailure(e);
     }
-    if (failure instanceof CannotRestoreValue) {
-      throw (CannotRestoreValue)failure;
+    if (failure instanceof CannotRestoreValue || failure instanceof WrongDataStructure) {
+      throw (RuntimeException) failure;
     }
   }
 
@@ -40,6 +40,9 @@ class Scenario {
     command.performCommand(new ImperativeCommand.Environment() {
       @Override
       public void logMessage(@NotNull String message) {
+        if (data instanceof GenerativeDataStructure) {
+          ((GenerativeDataStructure) data).ensureActiveStructure();
+        }
         log.add(message);
       }
 

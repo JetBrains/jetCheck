@@ -25,10 +25,14 @@ class GenerativeDataStructure extends AbstractDataStructure {
 
   @Override
   int drawInt(@NotNull IntDistribution distribution) {
-    dataTracker.checkContext(this);
+    ensureActiveStructure();
     int i = random.drawInt(distribution);
     node.addChild(new IntData(node.id.childId(null), i, distribution));
     return i;
+  }
+
+  void ensureActiveStructure() {
+    dataTracker.checkContext(this);
   }
 
   @Override

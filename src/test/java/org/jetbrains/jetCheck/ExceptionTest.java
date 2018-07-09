@@ -3,6 +3,8 @@
  */
 package org.jetbrains.jetCheck;
 
+import java.util.Objects;
+
 import static org.jetbrains.jetCheck.Generator.*;
 
 /**
@@ -54,7 +56,7 @@ public class ExceptionTest extends PropertyCheckerTestCase {
       return true;
     }), l -> l.stream().allMatch(i -> i > 0));
 
-    assertEquals("my exception", e.getFailure().getStoppingReason().getMessage());
+    assertEquals("my exception", Objects.requireNonNull(e.getFailure().getStoppingReason()).getMessage());
     assertTrue(StatusNotifier.printStackTrace(e).contains("my exception"));
   }
 
@@ -68,7 +70,7 @@ public class ExceptionTest extends PropertyCheckerTestCase {
     }
   }
 
-  public void testUsingWrongDataStructure() {
+  public void testUsingWrongDataStructureForGeneration() {
     Generator<Integer> gen = from(data1 -> {
       int i1 = data1.generate(naturals());
       int i2 = data1.generate(from(data2 -> data1.generate(integers())));
@@ -76,6 +78,16 @@ public class ExceptionTest extends PropertyCheckerTestCase {
     });
     try {
       PropertyChecker.forAll(gen, i -> true);
+      fail();
+    }
+    catch (WrongDataStructure expected) {
+    }
+  }
+
+  public void testUsingWrongDataStructureForLogging() {
+    try {
+      PropertyChecker.checkScenarios(() -> env ->
+              env.executeCommands(constant(env1 -> env.logMessage("Message"))));
       fail();
     }
     catch (WrongDataStructure expected) {
