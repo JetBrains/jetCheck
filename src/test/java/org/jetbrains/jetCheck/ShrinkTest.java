@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 import static org.jetbrains.jetCheck.Generator.*;
@@ -44,6 +45,28 @@ public class ShrinkTest extends PropertyCheckerTestCase {
         assertEquals("[]", e.getBreakingValue());
       }
     }
+  }
+
+  public void testNotAllDataIsConsumedAfterShrinking() {
+    AtomicBoolean failed = new AtomicBoolean();
+    Generator<Integer> gen = from(data -> {
+      int i = data.generate(from(data1 -> {
+        int j = data1.generate(integers(0, 10));
+        if (!failed.get()) {
+          data1.generate(integers(5, 10));
+        }
+        return j;
+      }));
+      data.generate(integers(-10, -5));
+      return i;
+    });
+    checkFalsified(gen, i -> {
+      if (i == 4) {
+        failed.set(true);
+        return false;
+      }
+      return true;
+    }, 3);
   }
 
 }

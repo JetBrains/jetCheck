@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
  */
 abstract class StructureElement {
   final NodeId id;
+  boolean unneeded;
 
   StructureElement(@NotNull NodeId id) {
     this.id = id;
@@ -28,6 +29,8 @@ abstract class StructureElement {
   abstract StructureElement findChildById(NodeId id);
   
   abstract void serialize(ByteArrayOutputStream out);
+
+  abstract StructureElement removeUnneeded();
 }
 
 class StructureNode extends StructureElement {
@@ -42,6 +45,13 @@ class StructureNode extends StructureElement {
   StructureNode(NodeId id, List<StructureElement> children) {
     super(id);
     this.children = children;
+  }
+
+  StructureNode copyWithChildren(List<StructureElement> children) {
+    StructureNode node = new StructureNode(id, children);
+    node.kind = kind;
+    node.shrinkProhibited = shrinkProhibited;
+    return node;
   }
 
   Iterator<StructureElement> childrenIterator() {
@@ -106,12 +116,12 @@ class StructureNode extends StructureElement {
       @Override
       ShrinkStep onSuccess(StructureNode smallerRoot) {
         StructureNode inheritor = (StructureNode)Objects.requireNonNull(smallerRoot.findChildById(id));
-        assert inheritor.children.size() == children.size();
-        if (inheritor.children.get(index).id != oldChild) {
+        int nextIndex = Math.min(index, inheritor.children.size() - 1);
+        if (inheritor.children.get(nextIndex).id != oldChild) {
           return inheritor.shrink();
         }
         
-        return inheritor.wrapChildShrink(index, step.onSuccess(smallerRoot));
+        return inheritor.wrapChildShrink(nextIndex, step.onSuccess(smallerRoot));
       }
 
       @Override
@@ -134,7 +144,7 @@ class StructureNode extends StructureElement {
     for (StructureElement child : children) {
       if (child instanceof StructureNode) {
         Integer childGen = child.id.generatorHash;
-        if (childGen != null && generatorHash == childGen.intValue()) {
+        if (childGen != null && generatorHash == childGen) {
           result.add((StructureNode)child);
         } else {
           ((StructureNode)child).findChildrenWithGenerator(generatorHash, result);
@@ -179,10 +189,7 @@ class StructureNode extends StructureElement {
 
     List<StructureElement> newChildren = new ArrayList<>(this.children);
     newChildren.set(index, newChild);
-    StructureNode copy = new StructureNode(this.id, newChildren);
-    copy.shrinkProhibited = this.shrinkProhibited;
-    copy.kind = this.kind;
-    return copy;
+    return copyWithChildren(newChildren);
   }
 
   @Nullable
@@ -204,6 +211,23 @@ class StructureNode extends StructureElement {
     int i = 0;
     while (i < children.size() && children.get(i).id.number <= id.number) i++;
     return i - 1;
+  }
+
+  @Override
+  StructureNode removeUnneeded() {
+    List<StructureElement> replaced = new ArrayList<>(children.size());
+    boolean changed = false;
+    for (StructureElement child : children) {
+      if (child.unneeded) {
+        return new StructureNode(id, replaced);
+      }
+      StructureElement removed = child.removeUnneeded();
+      if (removed != child) {
+        changed = true;
+      }
+      replaced.add(removed);
+    }
+    return changed ? copyWithChildren(replaced) : this;
   }
 
   @Override
@@ -282,6 +306,11 @@ class IntData extends StructureElement {
   @Override
   void serialize(ByteArrayOutputStream out) {
     DataSerializer.writeINT(out, value);
+  }
+
+  @Override
+  StructureElement removeUnneeded() {
+    return this;
   }
 
   @Override

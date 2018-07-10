@@ -140,7 +140,7 @@ class PropertyFailureImpl<T> implements PropertyFailure<T> {
 
       totalSteps++;
       T value = iteration.generateValue(new ReplayDataStructure(node, iteration.sizeHint, customizer));
-      CounterExampleImpl<T> example = CounterExampleImpl.checkProperty(iteration, value, customizer.writeChanges(node));
+      CounterExampleImpl<T> example = CounterExampleImpl.checkProperty(iteration, value, customizer.writeChanges(node.removeUnneeded()));
       if (example != null) {
         minimized = example;
         successfulSteps++;

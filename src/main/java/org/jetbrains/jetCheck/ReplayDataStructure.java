@@ -31,7 +31,12 @@ class ReplayDataStructure extends AbstractDataStructure {
 
   @Override
   public <T> T generate(@NotNull Generator<T> generator) {
-    return generator.getGeneratorFunction().apply(new ReplayDataStructure(nextChild(StructureNode.class), childSizeHint(), customizer));
+    ReplayDataStructure child = new ReplayDataStructure(nextChild(StructureNode.class), childSizeHint(), customizer);
+    T value = generator.getGeneratorFunction().apply(child);
+    if (child.iterator.hasNext()) {
+      child.iterator.next().unneeded = true;
+    }
+    return value;
   }
 
   @Override

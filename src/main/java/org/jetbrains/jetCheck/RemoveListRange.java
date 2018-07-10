@@ -53,9 +53,7 @@ class RemoveListRange extends ShrinkStep {
     lessItems.add(node.isIncompleteList() ? node.children.get(0) : new IntData(node.children.get(0).id, newSize, lengthDistribution));
     lessItems.addAll(node.children.subList(1, start));
     lessItems.addAll(node.children.subList(start + length, node.children.size()));
-    StructureNode replacement = new StructureNode(node.id, lessItems);
-    replacement.kind = StructureKind.LIST;
-    return root.replace(node.id, replacement);
+    return root.replace(node.id, node.copyWithChildren(lessItems));
   }
 
   @Override
