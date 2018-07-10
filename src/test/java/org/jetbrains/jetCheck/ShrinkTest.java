@@ -69,4 +69,11 @@ public class ShrinkTest extends PropertyCheckerTestCase {
     }, 3);
   }
 
+  public void testNegativeIntsShrinkInDirectionOfZero() {
+    for (int i = 0; i < 100; i++) {
+      //noinspection deprecation
+      PropertyFalsified fails = checkFails(PropertyChecker.customized().withSeed(i), integers(-1000, 10), j -> j >= 0);
+      assertEquals(-1, fails.getBreakingValue());
+    }
+  }
 }

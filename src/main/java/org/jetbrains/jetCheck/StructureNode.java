@@ -219,7 +219,7 @@ class StructureNode extends StructureElement {
     boolean changed = false;
     for (StructureElement child : children) {
       if (child.unneeded) {
-        return new StructureNode(id, replaced);
+        return copyWithChildren(replaced);
       }
       StructureElement removed = child.removeUnneeded();
       if (removed != child) {
@@ -288,7 +288,9 @@ class IntData extends StructureElement {
   }
 
   private ShrinkStep tryInt(int value, @NotNull Supplier<ShrinkStep> success, @Nullable Supplier<ShrinkStep> fail) {
-    return distribution.isValidValue(value) ? ShrinkStep.create(id, new IntData(id, value, distribution), __ -> success.get(), fail) : null;
+    return distribution.isValidValue(value)
+            ? ShrinkStep.create(id, new IntData(id, value, distribution), __ -> success.get(), fail)
+            : fail == null ? null : fail.get();
   }
 
   @NotNull
