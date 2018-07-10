@@ -58,7 +58,11 @@ class GenerativeDataStructure extends AbstractDataStructure {
       GenerativeDataStructure structure = subStructure(generator, childSizeHint());
       T value = dataTracker.generateOn(generator, structure, this);
       if (condition.test(value)) return value;
-      
+
+      if (random instanceof DataSerializer.SerializedIntSource) {
+        throw DataSerializer.errorRestoringSerialized();
+      }
+
       node.removeLastChild(structure.node);
     }
     throw new CannotSatisfyCondition(condition);

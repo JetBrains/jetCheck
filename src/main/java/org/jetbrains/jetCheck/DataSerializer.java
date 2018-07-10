@@ -1,6 +1,8 @@
 // Copyright 2000-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 package org.jetbrains.jetCheck;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.*;
 import java.util.Base64;
 
@@ -32,30 +34,25 @@ class DataSerializer {
     return record.read();
   }
 
-  static void writeINT(DataOutput record, int val) throws IOException {
+  static void writeINT(ByteArrayOutputStream record, int val) {
     if (0 > val || val >= 192) {
-      record.writeByte(192 + (val & 0x3F));
+      record.write(192 + (val & 0x3F));
       val >>>= 6;
       while (val >= 128) {
-        record.writeByte((val & 0x7F) | 0x80);
+        record.write((val & 0x7F) | 0x80);
         val >>>= 7;
       }
     }
-    record.writeByte(val);
+    record.write(val);
   }
   
   static String serialize(Iteration iteration, StructureElement node) {
-    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    try (DataOutputStream data = new DataOutputStream(stream)) {
-      writeINT(data, (int)(iteration.iterationSeed >> 32));
-      writeINT(data, (int)iteration.iterationSeed);
-      writeINT(data, iteration.sizeHint);
-      node.serialize(data);
-    }
-    catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    return Base64.getEncoder().encodeToString(stream.toByteArray());
+    ByteArrayOutputStream data = new ByteArrayOutputStream();
+    writeINT(data, (int)(iteration.iterationSeed >> 32));
+    writeINT(data, (int)iteration.iterationSeed);
+    writeINT(data, iteration.sizeHint);
+    node.serialize(data);
+    return Base64.getEncoder().encodeToString(data.toByteArray());
   }
 
   static void deserializeInto(String data, PropertyChecker.Parameters parameters) {
@@ -68,14 +65,31 @@ class DataSerializer {
     int hint = readINT(stream);
     parameters.sizeHintFun = __ -> hint;
 
-    parameters.serializedData = (IntDistribution dist) -> {
-      int i = readINT(stream);
-      if (!dist.isValidValue(i)) {
-        throw new CannotRestoreValue("Error restoring from serialized \"rechecking\" data. Possible cause: either the test or the environment it depends on has changed.");
-      }
-      return i;
-    };
+    parameters.serializedData = new SerializedIntSource(stream);
+  }
+
+  @NotNull
+  static CannotRestoreValue errorRestoringSerialized() {
+    return new CannotRestoreValue("Error restoring from serialized \"rechecking\" data. Possible cause: either the test or the environment it depends on has changed.");
   }
 
   static class EOFException extends RuntimeException {}
+
+  static class SerializedIntSource implements IntSource {
+    private final ByteArrayInputStream stream;
+
+    SerializedIntSource(ByteArrayInputStream stream) {
+      this.stream = stream;
+    }
+
+    @Override
+    public int drawInt(IntDistribution dist) {
+      int i = readINT(stream);
+      if (!dist.isValidValue(i)) {
+        throw errorRestoringSerialized();
+      }
+      return i;
+    }
+
+  }
 }
