@@ -39,7 +39,7 @@ If executed, it fails like this:
     org.jetbrains.jetCheck.PropertyFalsified: Falsified on 0
     Minimized in 1 stage, by trying 1 example
     
-    To reproduce the minimal failing case, run
+    To re-run the minimal failing case, run
       PropertyChecker.customized().rechecking("+/uO5x/L6LKECgEA")
         .forAll(...)
     To re-run the test with all intermediate minimization steps, use `recheckingIteration(-112063344742606325L, 1)` instead for last iteration, or `withSeed(-112063344742606325L)` for all iterations

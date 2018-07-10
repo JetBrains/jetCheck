@@ -4,6 +4,9 @@
 package org.jetbrains.jetCheck;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 import static org.jetbrains.jetCheck.Generator.*;
 
@@ -92,5 +95,26 @@ public class ExceptionTest extends PropertyCheckerTestCase {
     }
     catch (WrongDataStructure expected) {
     }
+  }
+
+  public void testNonReproducibleFailure() {
+    AtomicBoolean failed = new AtomicBoolean();
+    AtomicInteger runCount = new AtomicInteger();
+
+    Generator<Integer> gen = integers();
+    Predicate<Integer> prop = i -> {
+      runCount.incrementAndGet();
+      return !failed.compareAndSet(false, true);
+    };
+
+    PropertyFalsified e = checkFails(STABLE, gen, prop);
+    assertTrue(e.getMessage(), e.getMessage().contains(PropertyFalsified.NOT_REPRODUCIBLE));
+    assertEquals(0, e.getFailure().getTotalMinimizationExampleCount());
+
+    failed.set(false);
+    runCount.set(0);
+    //noinspection deprecation
+    checkFails(PropertyChecker.customized().rechecking(e.getFailure().getMinimalCounterexample().getSerializedData()), gen, prop);
+    assertEquals(1, runCount.get());
   }
 }

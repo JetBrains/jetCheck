@@ -36,6 +36,10 @@ class CounterExampleImpl<T> implements PropertyFailure.CounterExample<T> {
            new CounterExampleImpl<>(data, value, new IllegalStateException("Replaying failure is unexpectedly successful!"), iteration);
   }
 
+  boolean tryReproducing() {
+    return checkProperty(iteration, iteration.generateValue(createReplayData()), data) != null;
+  }
+
   @NotNull
   @Override
   public String getSerializedData() {

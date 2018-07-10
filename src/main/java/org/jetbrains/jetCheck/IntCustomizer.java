@@ -15,7 +15,9 @@ interface IntCustomizer {
 
   static int checkValidInt(IntData data, IntDistribution currentDistribution) {
     int value = data.value;
-    if (!currentDistribution.isValidValue(value)) throw new CannotRestoreValue();
+    if (!currentDistribution.isValidValue(value)) {
+      throw new CannotRestoreValue();
+    }
     return value;
   }
 

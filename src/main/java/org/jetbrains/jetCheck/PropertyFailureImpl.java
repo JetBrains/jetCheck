@@ -14,13 +14,17 @@ class PropertyFailureImpl<T> implements PropertyFailure<T> {
   private int successfulSteps;
   final Iteration<T> iteration;
   private Throwable stoppingReason;
+  final boolean reproducible;
 
   PropertyFailureImpl(@NotNull CounterExampleImpl<T> initial, Iteration<T> iteration) {
     this.initial = initial;
     this.minimized = initial;
     this.iteration = iteration;
+    this.reproducible = iteration.session.parameters.serializedData != null || initial.tryReproducing();
     try {
-      shrink();
+      if (reproducible) {
+        shrink();
+      }
     }
     catch (Throwable e) {
       stoppingReason = e;

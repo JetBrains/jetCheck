@@ -82,7 +82,7 @@ class Iteration<T> {
       failureReason != null && StatusNotifier.printStackTrace(failureReason).contains("PropertyChecker$Parameters.checkScenarios");
     String rechecking = "PropertyChecker.customized().rechecking(\"" + data + "\")\n    ." + 
                         (scenarios ? "checkScenarios" : "forAll") + "(...)\n";
-    return "To reproduce the minimal failing case, run\n  " + rechecking +
+    return "To re-run the minimal failing case, run\n  " + rechecking +
            "To re-run the test with all intermediate minimization steps, use `recheckingIteration("  + iterationSeed + "L, " + sizeHint + ")` instead for last iteration, or `withSeed(" + session.parameters.globalSeed + "L)` for all iterations";
   }
 

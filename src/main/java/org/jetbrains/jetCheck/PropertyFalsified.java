@@ -9,6 +9,7 @@ import java.util.List;
 @SuppressWarnings("ExceptionClassNameDoesntEndWithException")
 public class PropertyFalsified extends RuntimeException {
   static final String FAILURE_REASON_HAS_CHANGED_DURING_MINIMIZATION = "Failure reason has changed during minimization, see initial failing example below";
+  static final String NOT_REPRODUCIBLE = "The failure is not reproducible on re-run!!! Possible cause: side effects in the test.";
   private static final String SEPARATOR = "\n==========================\n";
   private final PropertyFailureImpl<?> failure;
   private final String message;
@@ -35,7 +36,11 @@ public class PropertyFalsified extends RuntimeException {
                  ? "Failed with " + rootCause + "\nOn " + exampleString 
                  : "Falsified on " + exampleString;
 
-    msg += "\n" + 
+    if (!failure.reproducible) {
+      msg += "\n\n" + NOT_REPRODUCIBLE;
+    }
+
+    msg += "\n" +
            getMinimizationStats() +
            "\n" + failure.iteration.printToReproduce(failureReason, failure.getMinimalCounterexample()) + "\n";
 
@@ -124,6 +129,7 @@ public class PropertyFalsified extends RuntimeException {
     return failure;
   }
 
+  @SuppressWarnings("WeakerAccess")
   public Object getBreakingValue() {
     return failure.getMinimalCounterexample().getExampleValue();
   }
