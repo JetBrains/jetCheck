@@ -14,16 +14,17 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * A generator for objects based on random data from {@link DataStructure}.<p/>
+ * A generator for objects based on random data from {@link DataStructure}.<p></p>
  *
  * A generator is a function that takes a source of random data (which is DataStructure) and, using that random data
  * (e.g. by calling more primitive generators and reinterpreting their results), constructs a value of type {@code T}.
- * For data structures returning the same data, generators should produce equivalent values.<p/>
+ * For data structures returning the same data, generators should produce equivalent values.<p></p>
  * 
  * Generators for standard types can be obtained using static methods of this class (e.g. {@link #integers}, {@link #listsOf} etc).
  * Generators for custom types can be created by deriving them from standard types (e.g. via {@link #map}, {@link #flatMap}, {@link #zipWith})
  * or by writing your own from scratch ({@link #from(Function)}).
  */
+@SuppressWarnings("WeakerAccess")
 public class Generator<T> {
   private final Function<DataStructure, T> myFunction;
 
@@ -33,10 +34,10 @@ public class Generator<T> {
 
   /**
    * Creates a generator from a custom function, that creates objects of the given type based on the data from {@link DataStructure}.
-   * The generator may invoke other, more primitive, generators using {@link DataStructure#generate(Generator)}.<p/>
+   * The generator may invoke other, more primitive, generators using {@link DataStructure#generate(Generator)}.<p></p>
    * 
    * When a property is falsified, the DataStructure is attempted to be minimized, and the generator will be run on
-   * ever "smaller" versions of it, this enables automatic minimization on all kinds of generated types.<p/>
+   * ever "smaller" versions of it, this enables automatic minimization on all kinds of generated types.<p></p>
    * 
    * To ensure test reproducibility during re-run or minimization phase,
    * the result of the generators should only depend on the DataStructure. Generators should not have any side effects
@@ -89,9 +90,9 @@ public class Generator<T> {
    * Attempts to generate the value several times, until one comes out that satisfies the given condition. That value is returned as generator result.
    * Results of all previous attempts are discarded. During shrinking, the underlying data structures from those attempts
    * won't be used for re-running generation, so be careful that those attempts don't leave any traces of themselves 
-   * (e.g. side effects, even ones internal to an outer generator).<p/> 
+   * (e.g. side effects, even ones internal to an outer generator).<p></p>
    * 
-   * If the condition still fails after a large number of attempts, data generation is stopped prematurely and {@link CannotSatisfyCondition} exception is thrown.<p/>
+   * If the condition still fails after a large number of attempts, data generation is stopped prematurely and {@link CannotSatisfyCondition} exception is thrown.<p></p>
    * 
    * This method is useful to avoid infrequent corner cases (e.g. {@code integers().suchThat(i -> i != 0)}). 
    * To eliminate large portions of search space, this strategy might prove ineffective 
@@ -160,9 +161,9 @@ public class Generator<T> {
   /**
    * A fixed-point combinator to easily create recursive generators by giving a name to the whole generator and allowing to reuse it inside itself. For example, a recursive tree generator could be defined as follows by binding itself to the name {@code nodes}:
    * <pre>
-   * Generator<Node> gen = Generator.recursive(<b>nodes</b> -> Generator.anyOf(
+   * Generator&lt;Node&gt; gen = Generator.recursive(<b>nodes</b> -&gt; Generator.anyOf(
    *   Generator.constant(new Leaf()),
-   *   Generator.listsOf(<b>nodes</b>).map(children -> new Composite(children))))  
+   *   Generator.listsOf(<b>nodes</b>).map(children -&gt; new Composite(children))))
    * </pre>
    * @return the generator returned from the passed function
    */

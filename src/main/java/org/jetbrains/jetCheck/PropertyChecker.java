@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 /**
  * An entry point to property-based testing. The main usage pattern: {@code PropertyChecker.forAll(generator, property)}.
  */
+@SuppressWarnings("WeakerAccess")
 public class PropertyChecker {
   static final int DEFAULT_MAX_SIZE_HINT = 100;
 

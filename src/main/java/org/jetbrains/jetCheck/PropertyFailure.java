@@ -3,8 +3,6 @@ package org.jetbrains.jetCheck;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Supplier;
-
 /**
  * @author peter
  */
@@ -43,7 +41,7 @@ public interface PropertyFailure<T> {
     Throwable getExceptionCause();
 
     /**
-     * Re-run the generator and the property on the {@link DataStructure} corresponding to this counter-example.<p/>
+     * Re-run the generator and the property on the {@link DataStructure} corresponding to this counter-example.<p></p>
      * 
      * This can be useful for debugging, when this example fails after some previous runs and shrinking, but doesn't fail
      * by itself. This can indicate unnoticed side effects in the generators and properties. Catching {@link PropertyFalsified}
@@ -55,7 +53,7 @@ public interface PropertyFailure<T> {
 
     /**
      * @return the data used for generator to produce this counterexample, serialized into Base64.
-     * To be used with {@link PropertyChecker#rechecking} or {@link ImperativeCommand#checkScenario}
+     * To be used with {@link PropertyChecker.Parameters#rechecking}.
      */
     @NotNull
     String getSerializedData();

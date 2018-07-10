@@ -9,11 +9,11 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Represents an action with potential side effects, for single-threaded property-based testing of stateful systems.
  * The engine executes a top-level command, which should prepare the system-under-test and run the sequence of nested (actual) commands
- * that change the system, check the needed invariants, and log all activity to allow to reproduce failing scenarios.<p/>
+ * that change the system, check the needed invariants, and log all activity to allow to reproduce failing scenarios.<p></p>
  * 
  * A typical way to test with imperative commands looks like this:
  * <pre>
- *   PropertyChecker.checkScenarios(() -> env -> {
+ *   PropertyChecker.checkScenarios(() -&gt; env -&gt; {
  *     System sys = setUpSystem();
  *     try {
  *       // run a random sequence of commands
@@ -44,14 +44,14 @@ import org.jetbrains.annotations.Nullable;
  * In the error message, the causing exception is printed together with command log.
  * Commands can and should log what they're doing using
  * {@link Environment#logMessage(String)} and {@link Environment#generateValue(Generator, String)} so that you
- * can restore the order of events that leads to the failure.<p/>
+ * can restore the order of events that leads to the failure.<p></p>
  * 
  * Top-level command should not have any side effects on the outside world, 
  * otherwise proper test case separation and minimization will be impossible.
  * The supplier that creates the top-level command should 
  * return a "fresh" object each time, as it's invoked on each testing and minimization iterations. 
  * Nested commands may have side effects, provided that those effects are fully contained within the system-under-test, 
- * which is set up and disposed inside the top-level command on each iteration.<p/>
+ * which is set up and disposed inside the top-level command on each iteration.<p></p>
  * 
  * Test case minimization is complicated, when commands make random choices based on the current state of the system
  * (which can change even after removing irrelevant commands during minimization).
@@ -72,9 +72,9 @@ public interface ImperativeCommand {
     /** Generate a pseudo-random value using the given generator.
      * Optionally log a message, so that when a test fails, you'd know the value was generated.
      * The message is a Java format string, so you can use it to include the generated value, e.g.
-     * {@code String s = generateValue(stringsOf(asciiLetters(), "Generated %s")}.<p/>
+     * {@code String s = generateValue(stringsOf(asciiLetters(), "Generated %s")}.<p></p>
      * If you don't want to generate message, or would like to show the generated value in a custom way, pass {@code null}.
-     * You can use {@link #logMessage} later to still leave a trace of this value generation in the log.<p/>
+     * You can use {@link #logMessage} later to still leave a trace of this value generation in the log.<p></p>
      * 
      * Consider making generators non-shrinkable (by invoking {@link Generator#noShrink()}) where possible
      * because it can speed up overall failing scenario minimization significantly.
