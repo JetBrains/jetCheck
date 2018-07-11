@@ -37,6 +37,7 @@ class CounterExampleImpl<T> implements PropertyFailure.CounterExample<T> {
   }
 
   boolean tryReproducing() {
+    iteration.session.notifier.beforeReproducing(data);
     return checkProperty(iteration, iteration.generateValue(createReplayData()), data) != null;
   }
 
@@ -52,11 +53,14 @@ class CounterExampleImpl<T> implements PropertyFailure.CounterExample<T> {
 
   static <T> CounterExampleImpl<T> checkProperty(Iteration<T> iteration, T value, StructureNode node) {
     try {
+      iteration.session.notifier.beforePropertyCheck(value);
       if (!iteration.session.property.test(value)) {
+        iteration.session.notifier.propertyCheckFailed(null);
         return new CounterExampleImpl<>(node, value, null, iteration);
       }
     }
     catch (Throwable e) {
+      iteration.session.notifier.propertyCheckFailed(e);
       return new CounterExampleImpl<>(node, value, e, iteration);
     }
     return null;

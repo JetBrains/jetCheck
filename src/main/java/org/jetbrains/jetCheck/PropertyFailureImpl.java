@@ -140,10 +140,17 @@ class PropertyFailureImpl<T> implements PropertyFailure<T> {
 
   private boolean tryStep(StructureNode node, CombinatorialIntCustomizer customizer) {
     try {
-      iteration.session.notifier.shrinkAttempt(this, iteration);
-
+      iteration.session.notifier.shrinkAttempt(this, iteration, node);
       totalSteps++;
-      T value = iteration.generateValue(new ReplayDataStructure(node, iteration.sizeHint, customizer));
+
+      T value;
+      try {
+        value = iteration.generateValue(new ReplayDataStructure(node, iteration.sizeHint, customizer));
+      } catch (Throwable e) {
+        iteration.session.notifier.replayFailed(e);
+        throw e;
+      }
+
       CounterExampleImpl<T> example = CounterExampleImpl.checkProperty(iteration, value, customizer.writeChanges(node.removeUnneeded()));
       if (example != null) {
         minimized = example;

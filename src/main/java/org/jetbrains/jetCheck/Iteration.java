@@ -130,7 +130,7 @@ class CheckSession<T> {
     this.generator = generator;
     this.property = property;
     this.parameters = parameters;
-    notifier = parameters.silent ? StatusNotifier.SILENT : new StatusNotifier(parameters.iterationCount);
+    notifier = new StatusNotifier(parameters);
   }
 
   boolean addGeneratedNode(StructureNode node) {

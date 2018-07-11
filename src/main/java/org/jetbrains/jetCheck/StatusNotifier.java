@@ -1,6 +1,7 @@
 package org.jetbrains.jetCheck;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -14,40 +15,31 @@ import java.util.Locale;
  */
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
 class StatusNotifier {
-  static final StatusNotifier SILENT = new StatusNotifier(0) {
-    @Override
-    boolean shouldPrint() {
-      return false;
-    }
-
-    @Override
-    void counterExampleFound(Iteration<?> iteration) {}
-
-    @Override
-    void eofException() {}
-  };
-  
-  private final int iterationCount;
+  private final PropertyChecker.Parameters parameters;
   private int currentIteration;
   private long lastPrinted = System.currentTimeMillis();
 
-  StatusNotifier(int iterationCount) {
-    this.iterationCount = iterationCount;
+  StatusNotifier(PropertyChecker.Parameters parameters) {
+    this.parameters = parameters;
   }
 
   void iterationStarted(int iteration) {
     currentIteration = iteration;
     if (shouldPrint()) {
-      System.out.println(formatCurrentTime() + ": iteration " + currentIteration + " of " + iterationCount + "...");
+      System.out.println(formatCurrentTime() + ": iteration " + currentIteration + " of " + parameters.iterationCount + "...");
     }
   }
 
   void counterExampleFound(Iteration<?> iteration) {
+    if (parameters.silent) return;
+
     lastPrinted = System.currentTimeMillis();
     System.err.println(formatCurrentTime() + ": failed on iteration " + currentIteration + " (" + iteration.printSeeds() + "), shrinking...");
   }
 
-  boolean shouldPrint() {
+  private boolean shouldPrint() {
+    if (parameters.silent) return false;
+
     if (System.currentTimeMillis() - lastPrinted > 5_000) {
       lastPrinted = System.currentTimeMillis();
       return true;
@@ -57,7 +49,8 @@ class StatusNotifier {
 
   private int lastReportedStage = -1;
   private String lastReportedTrace = null;
-  <T> void shrinkAttempt(PropertyFailure<T> failure, Iteration<T> iteration) {
+
+  <T> void shrinkAttempt(PropertyFailure<T> failure, Iteration<T> iteration, StructureNode data) {
     if (shouldPrint()) {
       int stage = failure.getMinimizationStageCount();
       System.out.println(formatCurrentTime() + ": still shrinking (" + iteration.printSeeds() + "). " +
@@ -79,10 +72,27 @@ class StatusNotifier {
         System.err.println();
       }
     }
+    if (parameters.printData) {
+      System.out.println("Generating from shrinked raw data: " + data);
+    }
   }
 
   void eofException() {
+    if (parameters.silent) return;
+
     System.out.println("Generator tried to read past the end of serialized data, so it seems the failure isn't reproducible anymore");
+  }
+
+  <T> void beforePropertyCheck(T value) {
+    if (parameters.printValues) {
+      System.out.println("Checking " + value);
+    }
+  }
+
+  void propertyCheckFailed(@Nullable Throwable exception) {
+    if (parameters.printValues) {
+      System.out.println("  failure" + (exception == null ? "" : ": " + exception.getClass().getName()));
+    }
   }
 
   private static String shortenStackTrace(Throwable e) {
@@ -100,5 +110,17 @@ class StatusNotifier {
     PrintWriter writer = new PrintWriter(stringWriter);
     e.printStackTrace(writer);
     return stringWriter.getBuffer().toString();
+  }
+
+  void beforeReproducing(StructureNode data) {
+    if (parameters.printData) {
+      System.out.println("Reproducing from raw data " + data);
+    }
+  }
+
+  void replayFailed(@NotNull Throwable e) {
+    if (parameters.printData) {
+      System.out.println("  failed: " + e.getClass().getName());
+    }
   }
 }

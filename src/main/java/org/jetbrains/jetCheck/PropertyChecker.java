@@ -45,6 +45,8 @@ public class PropertyChecker {
     IntUnaryOperator sizeHintFun = iteration -> (iteration - 1) % DEFAULT_MAX_SIZE_HINT + 1;
     int iterationCount = 100;
     boolean silent;
+    boolean printValues;
+    boolean printData;
 
     private Parameters() {
     }
@@ -53,7 +55,7 @@ public class PropertyChecker {
      * This function allows to start the test with a fixed random seed. It's useful to reproduce some previous test run and debug it.
      * @param seed A random seed to use for the first iteration.
      *             The following iterations will use other, pseudo-random seeds, but still derived from this one.
-     * @return this PropertyChecker
+     * @return this
      * @deprecated To catch your attention. It's fine to call this method during test debugging, but it should not be committed to version control
      * and used in regression tests, because any changes in the test itself or the framework can render the passed argument obsolete.
      * For regression testing, it's recommended to code the failing scenario explicitly.
@@ -72,7 +74,7 @@ public class PropertyChecker {
 
     /**
      * @param iterationCount the number of iterations to try. By default it's 100.
-     * @return this PropertyChecker
+     * @return this
      */
     public Parameters withIterationCount(int iterationCount) {
       if (serializedData != null) {
@@ -87,7 +89,7 @@ public class PropertyChecker {
      * @param sizeHintFun a function determining how size hint should be distributed depending on the iteration number.
      *                    By default the size hint will be 1 in the first iteration, 2 in the second one, and so on until 100,
      *                    then again 1,...,100,1,...,100, etc.
-     * @return this PropertyChecker
+     * @return this
      * @see DataStructure#getSizeHint()
      */
     public Parameters withSizeHint(@NotNull IntUnaryOperator sizeHintFun) {
@@ -101,11 +103,35 @@ public class PropertyChecker {
     }
 
     /**
-     * Suppresses all output from the testing infrastructure during property check and shrinking
-     * @return this PropertyChecker
+     * Suppresses all output from the testing infrastructure during property check and test minimization
+     * @return this
      */
     public Parameters silent() {
+      if (printValues) throw new IllegalStateException("'silent' is incompatible with 'printGeneratedValues'");
+      if (printData) throw new IllegalStateException("'silent' is incompatible with 'printRawData'");
       this.silent = true;
+      return this;
+    }
+
+    /**
+     * Enables verbose mode, when for every execution of property check all the generated values are printed to the stdout.
+     * If a check fails, this is also printed. Can be useful to get an impression of how good the generators are, and for debugging purposes.
+     * @return this
+     */
+    public Parameters printGeneratedValues() {
+      if (silent) throw new IllegalStateException("'printGeneratedValues' is incompatible with 'silent'");
+      printValues = true;
+      return this;
+    }
+
+    /**
+     * During minimization, prints the raw underlying data used to feed generators.
+     * Rarely needed, requires some understanding of the checker internals.
+     * @return th
+     */
+    public Parameters printRawData() {
+      if (silent) throw new IllegalStateException("'printRawData' is incompatible with 'silent'");
+      printData = true;
       return this;
     }
 
