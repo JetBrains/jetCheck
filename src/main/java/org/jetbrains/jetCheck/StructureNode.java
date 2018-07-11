@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
  */
 abstract class StructureElement {
   final NodeId id;
-  boolean unneeded;
 
   StructureElement(@NotNull NodeId id) {
     this.id = id;
@@ -30,7 +29,7 @@ abstract class StructureElement {
   
   abstract void serialize(ByteArrayOutputStream out);
 
-  abstract StructureElement removeUnneeded();
+  abstract StructureElement removeUnneeded(Set<NodeId> unneeded);
 }
 
 class StructureNode extends StructureElement {
@@ -214,14 +213,14 @@ class StructureNode extends StructureElement {
   }
 
   @Override
-  StructureNode removeUnneeded() {
+  StructureNode removeUnneeded(Set<NodeId> unneeded) {
     List<StructureElement> replaced = new ArrayList<>(children.size());
     boolean changed = false;
     for (StructureElement child : children) {
-      if (child.unneeded) {
+      if (unneeded.contains(child.id)) {
         return copyWithChildren(replaced);
       }
-      StructureElement removed = child.removeUnneeded();
+      StructureElement removed = child.removeUnneeded(unneeded);
       if (removed != child) {
         changed = true;
       }
@@ -311,7 +310,7 @@ class IntData extends StructureElement {
   }
 
   @Override
-  StructureElement removeUnneeded() {
+  StructureElement removeUnneeded(Set<NodeId> unneeded) {
     return this;
   }
 

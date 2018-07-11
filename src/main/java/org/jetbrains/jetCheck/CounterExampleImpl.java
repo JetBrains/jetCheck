@@ -3,6 +3,8 @@ package org.jetbrains.jetCheck;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
+
 class CounterExampleImpl<T> implements PropertyFailure.CounterExample<T> {
   final StructureNode data;
   private final T value;
@@ -48,7 +50,7 @@ class CounterExampleImpl<T> implements PropertyFailure.CounterExample<T> {
   }
 
   ReplayDataStructure createReplayData() {
-    return new ReplayDataStructure(data, iteration.sizeHint, IntCustomizer::checkValidInt);
+    return new ReplayDataStructure(data, iteration.sizeHint, IntCustomizer::checkValidInt, new HashSet<>());
   }
 
   static <T> CounterExampleImpl<T> checkProperty(Iteration<T> iteration, T value, StructureNode node) {

@@ -69,6 +69,21 @@ public class ShrinkTest extends PropertyCheckerTestCase {
     }, 3);
   }
 
+  public void testNotAllDataIsConsumedAfterShrinking_2() {
+    Generator<List<Integer>> gen = listsOf(from(data -> {
+      int i = data.generate(integers(0, 100));
+      if (i != 0) {
+        data.generate(integers(-10, -5));
+      }
+      return i;
+    }));
+    assertEquals(Arrays.asList(0, 0, 0, 0, 1), checkGeneratesExample(gen, ints -> {
+      int zeroIndex = ints.lastIndexOf(0);
+      return ints.size() >= 5 && zeroIndex >= 0 && zeroIndex != ints.size() - 1;
+    }, 29));
+  }
+
+
   public void testNegativeIntsShrinkInDirectionOfZero() {
     for (int i = 0; i < 100; i++) {
       //noinspection deprecation

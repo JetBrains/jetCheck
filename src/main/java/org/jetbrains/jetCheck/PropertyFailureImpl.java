@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 class PropertyFailureImpl<T> implements PropertyFailure<T> {
@@ -143,15 +144,16 @@ class PropertyFailureImpl<T> implements PropertyFailure<T> {
       iteration.session.notifier.shrinkAttempt(this, iteration, node);
       totalSteps++;
 
+      HashSet<NodeId> unneeded = new HashSet<>();
       T value;
       try {
-        value = iteration.generateValue(new ReplayDataStructure(node, iteration.sizeHint, customizer));
+        value = iteration.generateValue(new ReplayDataStructure(node, iteration.sizeHint, customizer, unneeded));
       } catch (Throwable e) {
         iteration.session.notifier.replayFailed(e);
         throw e;
       }
 
-      CounterExampleImpl<T> example = CounterExampleImpl.checkProperty(iteration, value, customizer.writeChanges(node.removeUnneeded()));
+      CounterExampleImpl<T> example = CounterExampleImpl.checkProperty(iteration, value, customizer.writeChanges(node.removeUnneeded(unneeded)));
       if (example != null) {
         minimized = example;
         successfulSteps++;

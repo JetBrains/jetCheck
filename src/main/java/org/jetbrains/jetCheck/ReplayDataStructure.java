@@ -3,16 +3,19 @@ package org.jetbrains.jetCheck;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
+import java.util.Set;
 import java.util.function.Predicate;
 
 class ReplayDataStructure extends AbstractDataStructure {
   private final Iterator<StructureElement> iterator;
   private final IntCustomizer customizer;
+  private final Set<NodeId> unneeded;
 
-  ReplayDataStructure(StructureNode node, int sizeHint, IntCustomizer customizer) {
+  ReplayDataStructure(StructureNode node, int sizeHint, IntCustomizer customizer, Set<NodeId> unneeded) {
     super(node, sizeHint);
     this.iterator = node.childrenIterator();
     this.customizer = customizer;
+    this.unneeded = unneeded;
   }
 
   @Override
@@ -35,10 +38,10 @@ class ReplayDataStructure extends AbstractDataStructure {
   }
 
   private <T> T generate(@NotNull Generator<T> generator, int childSizeHint) {
-    ReplayDataStructure child = new ReplayDataStructure(nextChild(StructureNode.class), childSizeHint, customizer);
+    ReplayDataStructure child = new ReplayDataStructure(nextChild(StructureNode.class), childSizeHint, customizer, unneeded);
     T value = generator.getGeneratorFunction().apply(child);
     if (child.iterator.hasNext()) {
-      child.iterator.next().unneeded = true;
+      unneeded.add(child.iterator.next().id);
     }
     return value;
   }
