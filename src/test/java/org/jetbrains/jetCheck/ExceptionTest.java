@@ -20,14 +20,14 @@ public class ExceptionTest extends PropertyCheckerTestCase {
       throw new AssertionError("fail");
     });
 
-    assertFalse(e.getMessage().contains(PropertyFalsified.FAILURE_REASON_HAS_CHANGED_DURING_MINIMIZATION));
+    assertFalse(e.getMessage().contains(PropertyFalsified.FAILURE_REASON_HAS_CHANGED_DURING_SHRINKING));
   }
 
   public void testFailureReasonChangedExceptionClass() {
     PropertyFalsified e = checkFails(STABLE, integers(), i -> {
       throw (i == 0 ? new RuntimeException("fail") : new IllegalArgumentException("fail"));
     });
-    assertTrue(e.getMessage().contains(PropertyFalsified.FAILURE_REASON_HAS_CHANGED_DURING_MINIMIZATION));
+    assertTrue(e.getMessage().contains(PropertyFalsified.FAILURE_REASON_HAS_CHANGED_DURING_SHRINKING));
   }
 
   public void testFailureReasonChangedExceptionTrace() {
@@ -39,7 +39,7 @@ public class ExceptionTest extends PropertyCheckerTestCase {
         throw new AssertionError("fail2");
       }
     });
-    assertTrue(e.getMessage().contains(PropertyFalsified.FAILURE_REASON_HAS_CHANGED_DURING_MINIMIZATION));
+    assertTrue(e.getMessage().contains(PropertyFalsified.FAILURE_REASON_HAS_CHANGED_DURING_SHRINKING));
   }
 
   public void testExceptionWhileGeneratingValue() {
@@ -109,7 +109,7 @@ public class ExceptionTest extends PropertyCheckerTestCase {
 
     PropertyFalsified e = checkFails(STABLE, gen, prop);
     assertTrue(e.getMessage(), e.getMessage().contains(PropertyFalsified.NOT_REPRODUCIBLE));
-    assertEquals(0, e.getFailure().getTotalMinimizationExampleCount());
+    assertEquals(0, e.getFailure().getTotalShrinkingExampleCount());
 
     failed.set(false);
     runCount.set(0);

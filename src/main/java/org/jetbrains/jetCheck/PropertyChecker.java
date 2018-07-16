@@ -103,7 +103,7 @@ public class PropertyChecker {
     }
 
     /**
-     * Suppresses all output from the testing infrastructure during property check and test minimization
+     * Suppresses all output from the testing infrastructure during property check and test shrinking
      * @return this
      */
     public Parameters silent() {
@@ -125,7 +125,7 @@ public class PropertyChecker {
     }
 
     /**
-     * During minimization, prints the raw underlying data used to feed generators.
+     * During shrinking, prints the raw underlying data used to feed generators.
      * Rarely needed, requires some understanding of the checker internals.
      * @return th
      */

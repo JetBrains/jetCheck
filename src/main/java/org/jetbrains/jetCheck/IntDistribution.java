@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Used for generating random int values with custom distribution, and ensuring that minimized integer values don't violate that distribution. 
+ * Used for generating random int values with custom distribution, and ensuring that shrunk integer values don't violate that distribution.
  */
 public interface IntDistribution {
   /** Returns an int value distributed in the needed fashion using the given Random */ 

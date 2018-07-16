@@ -10,7 +10,7 @@ import java.util.List;
 
 class PropertyFailureImpl<T> implements PropertyFailure<T> {
   private final CounterExampleImpl<T> initial;
-  private CounterExampleImpl<T> minimized;
+  private CounterExampleImpl<T> shrunk;
   private int totalSteps;
   private int successfulSteps;
   final Iteration<T> iteration;
@@ -19,7 +19,7 @@ class PropertyFailureImpl<T> implements PropertyFailure<T> {
 
   PropertyFailureImpl(@NotNull CounterExampleImpl<T> initial, Iteration<T> iteration) {
     this.initial = initial;
-    this.minimized = initial;
+    this.shrunk = initial;
     this.iteration = iteration;
     this.reproducible = iteration.session.parameters.serializedData != null || initial.tryReproducing();
     try {
@@ -41,7 +41,7 @@ class PropertyFailureImpl<T> implements PropertyFailure<T> {
   @NotNull
   @Override
   public CounterExampleImpl<T> getMinimalCounterexample() {
-    return minimized;
+    return shrunk;
   }
 
   @Nullable
@@ -51,12 +51,12 @@ class PropertyFailureImpl<T> implements PropertyFailure<T> {
   }
 
   @Override
-  public int getTotalMinimizationExampleCount() {
+  public int getTotalShrinkingExampleCount() {
     return totalSteps;
   }
 
   @Override
-  public int getMinimizationStageCount() {
+  public int getShrinkingStageCount() {
     return successfulSteps;
   }
 
@@ -90,12 +90,12 @@ class PropertyFailureImpl<T> implements PropertyFailure<T> {
 
   private ShrinkStep shrinkIteration(ShrinkStep limit) {
     ShrinkStep lastSuccessfulShrink = null;
-    ShrinkStep step = minimized.data.shrink();
+    ShrinkStep step = shrunk.data.shrink();
     while (step != null) {
       step = findSuccessfulShrink(step, limit);
       if (step != null) {
         lastSuccessfulShrink = step;
-        step = step.onSuccess(minimized.data);
+        step = step.onSuccess(shrunk.data);
       }
     }
     return lastSuccessfulShrink;
@@ -106,7 +106,7 @@ class PropertyFailureImpl<T> implements PropertyFailure<T> {
     List<CustomizedNode> combinatorial = new ArrayList<>();
 
     while (step != null && !step.equals(limit)) {
-      StructureNode node = step.apply(minimized.data);
+      StructureNode node = step.apply(shrunk.data);
       if (node != null && iteration.session.addGeneratedNode(node)) {
         CombinatorialIntCustomizer customizer = new CombinatorialIntCustomizer();
         if (tryStep(node, customizer)) {
@@ -130,7 +130,7 @@ class PropertyFailureImpl<T> implements PropertyFailure<T> {
     for (CustomizedNode customizedNode : delayed) {
       CombinatorialIntCustomizer customizer = customizedNode.customizer;
       while (customizer != null) {
-        if (tryStep(customizedNode.step.apply(minimized.data), customizer)) {
+        if (tryStep(customizedNode.step.apply(shrunk.data), customizer)) {
           return customizedNode.step;
         }
         customizer = customizer.nextAttempt();
@@ -155,7 +155,7 @@ class PropertyFailureImpl<T> implements PropertyFailure<T> {
 
       CounterExampleImpl<T> example = CounterExampleImpl.checkProperty(iteration, value, customizer.writeChanges(node.removeUnneeded(unneeded)));
       if (example != null) {
-        minimized = example;
+        shrunk = example;
         successfulSteps++;
         return true;
       }

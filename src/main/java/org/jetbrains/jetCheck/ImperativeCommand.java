@@ -47,14 +47,14 @@ import org.jetbrains.annotations.Nullable;
  * can restore the order of events that leads to the failure.<p></p>
  * 
  * Top-level command should not have any side effects on the outside world, 
- * otherwise proper test case separation and minimization will be impossible.
+ * otherwise proper test case separation and shrinking will be impossible.
  * The supplier that creates the top-level command should 
- * return a "fresh" object each time, as it's invoked on each testing and minimization iterations. 
+ * return a "fresh" object each time, as it's invoked on each testing and shrinking iterations.
  * Nested commands may have side effects, provided that those effects are fully contained within the system-under-test, 
  * which is set up and disposed inside the top-level command on each iteration.<p></p>
  * 
- * Test case minimization is complicated, when commands make random choices based on the current state of the system
- * (which can change even after removing irrelevant commands during minimization).
+ * Test case shrinking is complicated, when commands make random choices based on the current state of the system
+ * (which can change even after removing irrelevant commands during shrinking).
  * The engine tries to account for that heuristically. <b>Rule of thumb</b>: whenever your command generates an index into some list,
  * or uses {@link Generator#sampledFrom} on system elements, try to ensure that these elements have some predictable ordering.
  * It's ideal if each command effect on these elements is either adding or removing a contiguous range in that list. 
@@ -77,7 +77,7 @@ public interface ImperativeCommand {
      * You can use {@link #logMessage} later to still leave a trace of this value generation in the log.<p></p>
      * 
      * Consider making generators non-shrinkable (by invoking {@link Generator#noShrink()}) where possible
-     * because it can speed up overall failing scenario minimization significantly.
+     * because it can speed up overall failing scenario shrinking significantly.
      */
     <T> T generateValue(@NotNull Generator<T> generator, @Nullable String logMessage);
 

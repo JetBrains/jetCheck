@@ -36,13 +36,13 @@ public class Generator<T> {
    * Creates a generator from a custom function, that creates objects of the given type based on the data from {@link DataStructure}.
    * The generator may invoke other, more primitive, generators using {@link DataStructure#generate(Generator)}.<p></p>
    * 
-   * When a property is falsified, the DataStructure is attempted to be minimized, and the generator will be run on
-   * ever "smaller" versions of it, this enables automatic minimization on all kinds of generated types.<p></p>
+   * When a property is falsified, the DataStructure is attempted to be minimized (shrunk), and the generator will be run on
+   * ever "smaller" versions of it.<p></p>
    * 
-   * To ensure test reproducibility during re-run or minimization phase,
+   * To ensure test reproducibility during re-run or shrinking phase,
    * the result of the generators should only depend on the DataStructure. Generators should not have any side effects
    * or depend on the outside world. Generators may have internal mutable state accessible to other (nested) generators,
-   * but that's error-prone, difficult and computationally expensive to minimize. If you still think you need that,
+   * but that's error-prone, difficult and computationally expensive to shrink. If you still think you need that,
    * please see {@link ImperativeCommand} for potentially more convenient way of testing stateful systems.
    */
   @NotNull
@@ -77,8 +77,8 @@ public class Generator<T> {
   }
 
   /**
-   * Turns off automatic minimization for the data produced by this generator (and its components, if any).
-   * This can be useful to speed up minimization by not wasting time on shrinking objects where it makes no sense.
+   * Turns off automatic shrinking for the data produced by this generator (and its components, if any).
+   * This can be useful to speed up shrinking by not wasting time on shrinking objects where it makes no sense.
    * It's especially useful when using stateful generators (e.g. {@link ImperativeCommand}), because 
    * shrinkable values there can lead to doubling of the shrinking time.
    */

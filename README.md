@@ -2,7 +2,7 @@
  
 jetCheck is a property-based testing library for Java 8+, inspired by [QuickCheck](https://en.wikipedia.org/wiki/QuickCheck) and [Hypothesis](https://hypothesis.works/). Its distinguishing features are:
 * Automatic example minimization: you don't need to manually write shrinkers for your custom data types 
-* Re-running of minimized test example: once you've got a failing test, you can re-run (and debug) it without all the intermediate minimization steps
+* Re-running of minimized test example: once you've got a failing test, you can re-run (and debug) it without all the intermediate shrinking steps
 * Stateful system testing (single-threaded): you can generate a sequence of commands, and each command generation may depend on the state that previous commands have brought the system into.
 
 The library is by no means supposed to be feature-complete, and might lack even very basic data generators, if no clients have needed them yet. Improvement suggestions are welcome. 
@@ -37,12 +37,12 @@ You can add *jetCheck* dependency to your project by using [jitpack](https://jit
 If executed, it fails like this:
 
     org.jetbrains.jetCheck.PropertyFalsified: Falsified on 0
-    Minimized in 1 stage, by trying 1 example
+    Shrunk in 1 stage, by trying 1 example
     
     To re-run the minimal failing case, run
       PropertyChecker.customized().rechecking("+/uO5x/L6LKECgEA")
         .forAll(...)
-    To re-run the test with all intermediate minimization steps, use `recheckingIteration(-112063344742606325L, 1)` instead for last iteration, or `withSeed(-112063344742606325L)` for all iterations
+    To re-run the test with all intermediate shrinking steps, use `recheckingIteration(-112063344742606325L, 1)` instead for last iteration, or `withSeed(-112063344742606325L)` for all iterations
 
 This means that for the property `i == 42`, *jetCheck* has found and printed a counter-example: it's `0`. Of course, you'll have more complex properties working with more complex data types and generators for them. When a property-based test fails, the usual strategy is to take the printed value and create a regression unit test based on it, which you can then debug and fix.
 

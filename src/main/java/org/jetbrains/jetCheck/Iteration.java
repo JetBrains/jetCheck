@@ -83,7 +83,7 @@ class Iteration<T> {
     String rechecking = "PropertyChecker.customized().rechecking(\"" + data + "\")\n    ." + 
                         (scenarios ? "checkScenarios" : "forAll") + "(...)\n";
     return "To re-run the minimal failing case, run\n  " + rechecking +
-           "To re-run the test with all intermediate minimization steps, use `recheckingIteration("  + iterationSeed + "L, " + sizeHint + ")` instead for last iteration, or `withSeed(" + session.parameters.globalSeed + "L)` for all iterations";
+           "To re-run the test with all intermediate shrinking steps, use `recheckingIteration("  + iterationSeed + "L, " + sizeHint + ")` instead for last iteration, or `withSeed(" + session.parameters.globalSeed + "L)` for all iterations";
   }
 
   String printSeeds() {

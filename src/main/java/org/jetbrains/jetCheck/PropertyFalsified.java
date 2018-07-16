@@ -8,7 +8,7 @@ import java.util.List;
  */
 @SuppressWarnings("ExceptionClassNameDoesntEndWithException")
 public class PropertyFalsified extends RuntimeException {
-  static final String FAILURE_REASON_HAS_CHANGED_DURING_MINIMIZATION = "Failure reason has changed during minimization, see initial failing example below";
+  static final String FAILURE_REASON_HAS_CHANGED_DURING_SHRINKING = "Failure reason has changed during shrinking, see initial failing example below";
   static final String NOT_REPRODUCIBLE = "The failure is not reproducible on re-run!!! Possible cause: side effects in the test.";
   private static final String SEPARATOR = "\n==========================\n";
   private final PropertyFailureImpl<?> failure;
@@ -41,7 +41,7 @@ public class PropertyFalsified extends RuntimeException {
     }
 
     msg += "\n" +
-           getMinimizationStats() +
+           getShrinkingStats() +
            "\n" + failure.iteration.printToReproduce(failureReason, failure.getMinimalCounterexample()) + "\n";
 
     if (failureReason != null) {
@@ -51,13 +51,13 @@ public class PropertyFalsified extends RuntimeException {
     }
 
     if (failure.getStoppingReason() != null) {
-      msg += "\n Minimization stopped prematurely, see the reason below.";
-      appendTrace(traceBuilder, "An unexpected exception happened during minimization: ", failure.getStoppingReason());
+      msg += "\n Shrinking stopped prematurely, see the reason below.";
+      appendTrace(traceBuilder, "An unexpected exception happened during shrinking: ", failure.getStoppingReason());
     }
     
     Throwable first = failure.getFirstCounterExample().getExceptionCause();
     if (exceptionsDiffer(first, failure.getMinimalCounterexample().getExceptionCause())) {
-      msg += "\n " + FAILURE_REASON_HAS_CHANGED_DURING_MINIMIZATION;
+      msg += "\n " + FAILURE_REASON_HAS_CHANGED_DURING_SHRINKING;
       StringBuilder secondaryTrace = new StringBuilder();
       traceBuilder.append("\n Initial value: ").append(valueToString(failure.getFirstCounterExample(), secondaryTrace));
       if (first == null) {
@@ -92,16 +92,16 @@ public class PropertyFalsified extends RuntimeException {
     }
   }
   
-  private String getMinimizationStats() {
-    int exampleCount = failure.getTotalMinimizationExampleCount();
+  private String getShrinkingStats() {
+    int exampleCount = failure.getTotalShrinkingExampleCount();
     if (exampleCount == 0) return "";
     String examples = exampleCount == 1 ? "example" : "examples";
 
-    int stageCount = failure.getMinimizationStageCount();
-    if (stageCount == 0) return "Couldn't minimize, tried " + exampleCount + " " + examples + "\n";
+    int stageCount = failure.getShrinkingStageCount();
+    if (stageCount == 0) return "Couldn't shrink, tried " + exampleCount + " " + examples + "\n";
 
     String stages = stageCount == 1 ? "stage" : "stages";
-    return "Minimized in " + stageCount + " " + stages + ", by trying " + exampleCount + " " + examples + "\n";
+    return "Shrunk in " + stageCount + " " + stages + ", by trying " + exampleCount + " " + examples + "\n";
   }
 
   private static boolean exceptionsDiffer(Throwable e1, Throwable e2) {

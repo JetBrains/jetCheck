@@ -52,9 +52,9 @@ class StatusNotifier {
 
   <T> void shrinkAttempt(PropertyFailure<T> failure, Iteration<T> iteration, StructureNode data) {
     if (shouldPrint()) {
-      int stage = failure.getMinimizationStageCount();
+      int stage = failure.getShrinkingStageCount();
       System.out.println(formatCurrentTime() + ": still shrinking (" + iteration.printSeeds() + "). " +
-                         "Examples tried: " + failure.getTotalMinimizationExampleCount() +
+                         "Examples tried: " + failure.getTotalShrinkingExampleCount() +
                          ", successful minimizations: " + stage);
       if (lastReportedStage != stage) {
         lastReportedStage = stage;
@@ -73,7 +73,7 @@ class StatusNotifier {
       }
     }
     if (parameters.printData) {
-      System.out.println("Generating from shrinked raw data: " + data);
+      System.out.println("Generating from shrunk raw data: " + data);
     }
   }
 

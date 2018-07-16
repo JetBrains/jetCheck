@@ -16,9 +16,9 @@ public interface PropertyFailure<T> {
   @Nullable
   Throwable getStoppingReason();
   
-  int getTotalMinimizationExampleCount();
+  int getTotalShrinkingExampleCount();
   
-  int getMinimizationStageCount();
+  int getShrinkingStageCount();
   
   int getIterationNumber();
   
