@@ -70,6 +70,9 @@ class GenerativeDataStructure extends AbstractDataStructure {
 
   @Override
   void changeKind(StructureKind kind) {
+    if (node.kind != StructureKind.GENERIC) {
+      throw new IllegalStateException("Attempt to use incompatible generator on a same data structure which is already " + node.kind);
+    }
     node.kind = kind;
   }
 
