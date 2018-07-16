@@ -50,7 +50,7 @@ class RemoveListRange extends ShrinkStep {
     if (!lengthDistribution.isValidValue(newSize)) return null;
 
     List<StructureElement> lessItems = new ArrayList<>(newSize + 1);
-    lessItems.add(node.isIncompleteList() ? node.children.get(0) : new IntData(node.children.get(0).id, newSize, lengthDistribution));
+    lessItems.add(new IntData(node.children.get(0).id, newSize, lengthDistribution));
     lessItems.addAll(node.children.subList(1, start));
     lessItems.addAll(node.children.subList(start + length, node.children.size()));
     return root.replace(node.id, node.copyWithChildren(lessItems));

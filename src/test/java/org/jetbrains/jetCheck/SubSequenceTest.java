@@ -28,11 +28,11 @@ public class SubSequenceTest extends PropertyCheckerTestCase{
   public static Collection data() {
     return Arrays.asList(
       new Object[]{"abcde", 399},
-      new Object[]{"abcdef", 420},
-      new Object[]{"sadf", 107},
+      new Object[]{"abcdef", 418},
+      new Object[]{"sadf", 105},
       new Object[]{"asdf", 118},
-      new Object[]{"xxx", 81},
-      new Object[]{"AA", 47}
+      new Object[]{"xxx", 77},
+      new Object[]{"AA", 45}
     );
   }
 
