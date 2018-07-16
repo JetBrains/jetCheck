@@ -3,6 +3,9 @@ package org.jetbrains.jetCheck;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 class Iteration<T> {
@@ -18,6 +21,7 @@ class Iteration<T> {
       return ": cannot generate enough sufficiently different values";
     }
   };
+  private static final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(0);
 
   final CheckSession<T> session;
   long iterationSeed;
@@ -46,32 +50,40 @@ class Iteration<T> {
       if (i > 0) {
         initSeed(random.nextLong());
       }
-      StructureNode node = new StructureNode(new NodeId(session.generator));
-      T value;
+
+      ScheduledFuture<?> printSeeds = executor.schedule(
+              () -> System.out.println("An iteration is running for too long, " + printSeeds()),
+              1, TimeUnit.MINUTES);
       try {
-        IntSource source = session.parameters.serializedData != null ? session.parameters.serializedData : d -> d.generateInt(random);
-        value = session.generator.getGeneratorFunction().apply(new GenerativeDataStructure(source, node, sizeHint));
-      }
-      catch (CannotSatisfyCondition e) {
-        continue;
-      }
-      catch (DataSerializer.EOFException e) {
-        session.notifier.eofException();
-        return null;
-      }
-      catch (WrongDataStructure e) {
-        throw e;
-      }
-      catch (Throwable e) {
-        //noinspection InstanceofCatchParameter
-        if (e instanceof CannotRestoreValue && session.parameters.serializedData != null) {
+        StructureNode node = new StructureNode(new NodeId(session.generator));
+        T value;
+        try {
+          IntSource source = session.parameters.serializedData != null ? session.parameters.serializedData : d -> d.generateInt(random);
+          value = session.generator.getGeneratorFunction().apply(new GenerativeDataStructure(source, node, sizeHint));
+        }
+        catch (CannotSatisfyCondition e) {
+          continue;
+        }
+        catch (DataSerializer.EOFException e) {
+          session.notifier.eofException();
+          return null;
+        }
+        catch (WrongDataStructure e) {
           throw e;
         }
-        throw new GeneratorException(this, e);
-      }
-      if (!session.addGeneratedNode(node)) continue;
+        catch (Throwable e) {
+          //noinspection InstanceofCatchParameter
+          if (e instanceof CannotRestoreValue && session.parameters.serializedData != null) {
+            throw e;
+          }
+          throw new GeneratorException(this, e);
+        }
+        if (!session.addGeneratedNode(node)) continue;
 
-      return CounterExampleImpl.checkProperty(this, value, node);
+        return CounterExampleImpl.checkProperty(this, value, node);
+      } finally {
+        printSeeds.cancel(false);
+      }
     }
     throw new GeneratorException(this, new CannotSatisfyCondition(DATA_IS_DIFFERENT));
   }
