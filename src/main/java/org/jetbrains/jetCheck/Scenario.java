@@ -15,7 +15,7 @@ class Scenario {
   private final List<Object> log = new ArrayList<>();
   private Throwable failure;
 
-  private Scenario(@NotNull ImperativeCommand cmd, @NotNull DataStructure data) {
+  private Scenario(@NotNull ImperativeCommand cmd, @NotNull GenerationEnvironment data) {
     try {
       performCommand(cmd, data, log);
     }
@@ -36,7 +36,7 @@ class Scenario {
     }
   }
 
-  private void performCommand(ImperativeCommand command, DataStructure data, List<Object> log) {
+  private void performCommand(ImperativeCommand command, GenerationEnvironment data, List<Object> log) {
     command.performCommand(new ImperativeCommand.Environment() {
       @Override
       public void logMessage(@NotNull String message) {
@@ -68,7 +68,7 @@ class Scenario {
       private void innerCommandLists(final Generator<List<Object>> listGen) {
         data.generate(Generator.from(new EquivalentGenerator<List<Object>>() {
           @Override
-          public List<Object> apply(DataStructure data) {
+          public List<Object> apply(GenerationEnvironment data) {
             return listGen.getGeneratorFunction().apply(data);
           }
         }));
@@ -78,7 +78,7 @@ class Scenario {
       private Generator<Object> innerCommands(Generator<? extends ImperativeCommand> cmdGen) {
         return Generator.from(new EquivalentGenerator<Object>() {
           @Override
-          public Object apply(DataStructure cmdData) {
+          public Object apply(GenerationEnvironment cmdData) {
             List<Object> localLog = new ArrayList<>();
             log.add(localLog);
             performCommand(safeGenerate(cmdData, cmdGen), cmdData, localLog);
@@ -89,7 +89,7 @@ class Scenario {
     });
   }
 
-  private <T> T safeGenerate(DataStructure data, Generator<T> generator) {
+  private <T> T safeGenerate(GenerationEnvironment data, Generator<T> generator) {
     try {
       return data.generate(generator);
     }
@@ -139,7 +139,7 @@ class Scenario {
     return Generator.from(data -> new Scenario(command.get(), data));
   }
 
-  private static abstract class EquivalentGenerator<T> implements Function<DataStructure, T> {
+  private static abstract class EquivalentGenerator<T> implements Function<GenerationEnvironment, T> {
     @Override
     public boolean equals(Object obj) {
       return getClass() == obj.getClass(); // for recursive shrinking to work

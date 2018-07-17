@@ -77,7 +77,7 @@ class GenerativeDataStructure extends AbstractDataStructure {
   }
 
   private class CurrentData {
-    DataStructure current = GenerativeDataStructure.this;
+    GenerationEnvironment current = GenerativeDataStructure.this;
 
     <T> T generateOn(Generator<T> gen, GenerativeDataStructure data, GenerativeDataStructure parent) {
       checkContext(parent);
@@ -98,6 +98,6 @@ class GenerativeDataStructure extends AbstractDataStructure {
 
 class WrongDataStructure extends IllegalStateException {
   WrongDataStructure() {
-    super("You're calling methods on wrong DataStructure, confusing nested lambda arguments?");
+    super("You're calling methods on wrong environment, confusing nested lambda arguments?");
   }
 }

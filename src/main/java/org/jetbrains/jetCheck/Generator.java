@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * A generator for objects based on random data from {@link DataStructure}.<p></p>
+ * A generator for objects based on random data from {@link GenerationEnvironment}.<p></p>
  *
- * A generator is a function that takes a source of random data (which is DataStructure) and, using that random data
+ * A generator is a function that takes a source of random data (which is {@link GenerationEnvironment}) and, using that random data
  * (e.g. by calling more primitive generators and reinterpreting their results), constructs a value of type {@code T}.
  * For data structures returning the same data, generators should produce equivalent values.<p></p>
  * 
@@ -23,31 +23,31 @@ import java.util.stream.IntStream;
  */
 @SuppressWarnings("WeakerAccess")
 public class Generator<T> {
-  private final Function<DataStructure, T> myFunction;
+  private final Function<GenerationEnvironment, T> myFunction;
 
-  Generator(Function<DataStructure, T> function) {
+  Generator(Function<GenerationEnvironment, T> function) {
     myFunction = function;
   }
 
   /**
-   * Creates a generator from a custom function, that creates objects of the given type based on the data from {@link DataStructure}.
-   * The generator may invoke other, more primitive, generators using {@link DataStructure#generate(Generator)}.<p></p>
+   * Creates a generator from a custom function, that creates objects of the given type based on the data from {@link GenerationEnvironment}.
+   * The generator may invoke other, more primitive, generators using {@link GenerationEnvironment#generate(Generator)}.<p></p>
    * 
-   * When a property is falsified, the DataStructure is attempted to be minimized (shrunk), and the generator will be run on
+   * When a property is falsified, the GenerationEnvironment is attempted to be minimized (shrunk), and the generator will be run on
    * ever "smaller" versions of it.<p></p>
    * 
    * To ensure test reproducibility during re-run or shrinking phase,
-   * the result of the generators should only depend on the DataStructure. Generators should not have any side effects
+   * the result of the generators should only depend on the GenerationEnvironment. Generators should not have any side effects
    * or depend on the outside world. Generators may have internal mutable state accessible to other (nested) generators,
    * but that's error-prone, difficult and computationally expensive to shrink. If you still think you need that,
    * please see {@link ImperativeCommand} for potentially more convenient way of testing stateful systems.
    */
   @NotNull
-  public static <T> Generator<T> from(@NotNull Function<DataStructure, T> function) {
+  public static <T> Generator<T> from(@NotNull Function<GenerationEnvironment, T> function) {
     return new Generator<>(function);
   }
 
-  Function<DataStructure, T> getGeneratorFunction() {
+  Function<GenerationEnvironment, T> getGeneratorFunction() {
     return myFunction;
   }
 
@@ -320,7 +320,7 @@ public class Generator<T> {
     return from(data -> generateList(itemGenerator, data, ((AbstractDataStructure)data).drawInt(length)));
   }
 
-  private static <T> List<T> generateList(Generator<T> itemGenerator, DataStructure data, int size) {
+  private static <T> List<T> generateList(Generator<T> itemGenerator, GenerationEnvironment data, int size) {
     ((AbstractDataStructure) data).changeKind(StructureKind.LIST);
     List<T> list = new ArrayList<>(size);
     for (int i = 0; i < size; i++) {

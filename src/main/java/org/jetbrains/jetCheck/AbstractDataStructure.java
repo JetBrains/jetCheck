@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 /**
  * @author peter
  */
-abstract class AbstractDataStructure implements DataStructure {
+abstract class AbstractDataStructure implements GenerationEnvironment {
   protected final StructureNode node;
   protected final int sizeHint;
 

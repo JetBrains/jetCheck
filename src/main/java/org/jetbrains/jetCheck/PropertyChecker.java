@@ -90,7 +90,7 @@ public class PropertyChecker {
      *                    By default the size hint will be 1 in the first iteration, 2 in the second one, and so on until 100,
      *                    then again 1,...,100,1,...,100, etc.
      * @return this
-     * @see DataStructure#getSizeHint()
+     * @see GenerationEnvironment#getSizeHint()
      */
     public Parameters withSizeHint(@NotNull IntUnaryOperator sizeHintFun) {
       if (serializedData != null) {

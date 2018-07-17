@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
  * A context for {@link Generator}s. Primitive generators (e.g. {@link Generator#integers} know how to obtain
  * random data from it, other generators build more complex values on top of that, by running {@link #generate(Generator)} recursively.
  */
-public interface DataStructure {
+public interface GenerationEnvironment {
 
   /**
    * @return a non-negative number used by various generators to guide the sizes of structures (e.g. collections) they create.
