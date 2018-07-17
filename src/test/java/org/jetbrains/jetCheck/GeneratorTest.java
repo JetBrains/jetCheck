@@ -102,11 +102,13 @@ public class GeneratorTest extends PropertyCheckerTestCase {
 
   public void testNoDuplicateData() {
     Set<List<Integer>> visited = new HashSet<>();
+    //noinspection Convert2MethodRef
     PropertyChecker.forAll(listsOf(integers()), l -> visited.add(l));
   }
 
   public void testOneOf() {
     List<Integer> values = new ArrayList<>();
+    //noinspection Convert2MethodRef
     PropertyChecker.forAll(anyOf(integers(0, 1), integers(10, 1100)), i -> values.add(i));
     assertTrue(values.stream().anyMatch(i -> i < 2));
     assertTrue(values.stream().anyMatch(i -> i > 5));
@@ -149,7 +151,11 @@ public class GeneratorTest extends PropertyCheckerTestCase {
                    l -> !l.contains(1) || !l.contains(2),
                    2);
 
-    checkFalsified(listsOf(frequency(1, constant(1), 1, constant(2)).with(1, constant(3))),
+    LinkedHashMap<Generator<? extends Integer>, Integer> map = new LinkedHashMap<>();
+    map.put(constant(1), 1);
+    map.put(constant(2), 1);
+    map.put(constant(3), 1);
+    checkFalsified(listsOf(frequency(map)),
                    l -> !l.contains(1) || !l.contains(2) || !l.contains(3),
                    5);
   }

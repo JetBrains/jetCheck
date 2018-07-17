@@ -2,10 +2,7 @@ package org.jetbrains.jetCheck;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -140,17 +137,43 @@ public class Generator<T> {
     });
   }
  
-  /** Delegates one of the two generators with probability corresponding to their weights */
-  public static <T> FrequencyGenerator<T> frequency(int weight1, Generator<? extends T> alternative1,
-                                                    int weight2, Generator<? extends T> alternative2) {
-    return new FrequencyGenerator<>(weight1, alternative1, weight2, alternative2);
+  /** Delegates to one of the two generators with probability corresponding to their weights */
+  public static <T> Generator<T> frequency(int weight1, Generator<? extends T> alternative1,
+                                           int weight2, Generator<? extends T> alternative2) {
+    LinkedHashMap<Generator<? extends T>, Integer> map = new LinkedHashMap<>();
+    map.put(alternative1, weight1);
+    map.put(alternative2, weight2);
+    return frequency(map);
   }
 
-  /** Delegates one of the three generators with probability corresponding to their weights */
+  /** Delegates to one of the three generators with probability corresponding to their weights */
   public static <T> Generator<T> frequency(int weight1, Generator<? extends T> alternative1, 
                                            int weight2, Generator<? extends T> alternative2,
                                            int weight3, Generator<? extends T> alternative3) {
-    return frequency(weight1, alternative1, weight2, alternative2).with(weight3, alternative3);
+    LinkedHashMap<Generator<? extends T>, Integer> map = new LinkedHashMap<>();
+    map.put(alternative1, weight1);
+    map.put(alternative2, weight2);
+    map.put(alternative3, weight3);
+    return frequency(map);
+  }
+
+  /** Delegates to one of the generators in map keys with probability corresponding to the weights in values*/
+  public static <T> Generator<T> frequency(Map<Generator<? extends T>, Integer> alternatives) {
+    ArrayList<Generator<? extends T>> keys = new ArrayList<>();
+    List<Integer> weights = new ArrayList<>();
+    for (Map.Entry<Generator<? extends T>, Integer> entry : alternatives.entrySet()) {
+      keys.add(entry.getKey());
+      weights.add(entry.getValue());
+    }
+    if (keys.contains(null) || weights.contains(null)) {
+      throw new IllegalArgumentException("Alternatives passed to 'frequency' shouldn't contain nulls");
+    }
+
+    IntDistribution distribution = IntDistribution.frequencyDistribution(weights);
+    return from(data -> {
+      ((AbstractDataStructure) data).changeKind(StructureKind.CHOICE);
+      return data.generate(keys.get(((AbstractDataStructure) data).drawInt(distribution)));
+    });
   }
 
   /** Gets the data from two generators and invokes the given function to produce a result based on the two generated values. */
