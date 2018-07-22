@@ -3,8 +3,8 @@ package org.jetbrains.jetCheck;
 import java.util.Random;
 import java.util.function.ToIntFunction;
 
-public class BoundedIntDistribution implements IntDistribution {
-  public static final IntDistribution ALL_INTS = IntDistribution.uniform(Integer.MIN_VALUE, Integer.MAX_VALUE);
+class BoundedIntDistribution implements IntDistribution {
+  static final IntDistribution ALL_INTS = IntDistribution.uniform(Integer.MIN_VALUE, Integer.MAX_VALUE);
   private final int min;
   private final int max;
   private final ToIntFunction<Random> producer;
@@ -16,11 +16,11 @@ public class BoundedIntDistribution implements IntDistribution {
     this.producer = producer;
   }
 
-  int getMin() {
+  public int getMin() {
     return min;
   }
 
-  int getMax() {
+  public int getMax() {
     return max;
   }
 

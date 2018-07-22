@@ -268,7 +268,7 @@ class IntData extends StructureElement {
 
     int minValue = 0;
     if (distribution instanceof BoundedIntDistribution) {
-      minValue = Math.max(minValue, ((BoundedIntDistribution)distribution).getMin());
+      minValue = Math.max(minValue, distribution.getMin());
     }
     return tryInt(minValue, () -> null, this::tryNegation);
   }

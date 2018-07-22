@@ -38,9 +38,7 @@ class CombinatorialIntCustomizer implements IntCustomizer {
   }
 
   public int suggestInt(IntData data, IntDistribution currentDistribution) {
-    if (data.distribution instanceof BoundedIntDistribution &&
-        currentDistribution instanceof BoundedIntDistribution &&
-        registerDifferentRange(data, (BoundedIntDistribution)currentDistribution, (BoundedIntDistribution)data.distribution)) {
+    if (registerDifferentRange(data, currentDistribution, data.distribution)) {
       return suggestCombinatorialVariant(data, currentDistribution);
     }
     return IntCustomizer.checkValidInt(data, currentDistribution);
@@ -55,7 +53,7 @@ class CombinatorialIntCustomizer implements IntCustomizer {
     throw new CannotRestoreValue();
   }
 
-  private boolean registerDifferentRange(IntData data, BoundedIntDistribution current, BoundedIntDistribution original) {
+  private boolean registerDifferentRange(IntData data, IntDistribution current, IntDistribution original) {
     if (currentCombination.containsKey(data.id)) {
       changedDistributions.put(data.id, current);
       return true;
@@ -73,7 +71,7 @@ class CombinatorialIntCustomizer implements IntCustomizer {
     return false;
   }
 
-  private LinkedHashSet<Integer> getPossibleValues(IntData data, BoundedIntDistribution current, BoundedIntDistribution original) {
+  private LinkedHashSet<Integer> getPossibleValues(IntData data, IntDistribution current, IntDistribution original) {
     List<Integer> possibleValues = new ArrayList<>();
     int fromStart = data.value - original.getMin();
     int fromEnd = original.getMax() - data.value;

@@ -12,6 +12,10 @@ public interface IntDistribution {
 
   /** @return true if the given value is valid for this distribution */
   boolean isValidValue(int i);
+
+  int getMin();
+
+  int getMax();
   
   /**
    * This distribution returns an integer uniformly distributed between {@code min} and {@code max} (both ends inclusive).
@@ -30,18 +34,10 @@ public interface IntDistribution {
    */
   static IntDistribution geometric(int mean) {
     double p = 1.0 / (mean + 1);
-    return new IntDistribution() {
-      @Override
-      public int generateInt(Random random) {
-        double u = random.nextDouble();
-        return (int) (Math.log(u) / Math.log(1 - p));
-      }
-
-      @Override
-      public boolean isValidValue(int i) {
-        return i >= 0;
-      }
-    };
+    return new BoundedIntDistribution(0, Integer.MAX_VALUE, random -> {
+      double u = random.nextDouble();
+      return (int) (Math.log(u) / Math.log(1 - p));
+    });
   }
 
   /**
