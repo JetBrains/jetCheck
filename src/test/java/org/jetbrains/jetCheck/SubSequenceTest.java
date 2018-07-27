@@ -45,8 +45,9 @@ public class SubSequenceTest extends PropertyCheckerTestCase{
           throw new AssertionError("Found " + sb.toString());
         }
       }));
-    }), Scenario::ensureSuccessful, expectedMinimizations).getMinimalCounterexample();
+    }, s -> {}), Scenario::ensureSuccessful, expectedMinimizations).getMinimalCounterexample();
     String log = example.getExampleValue().toString();
+    //noinspection ConstantConditions
     assertEquals(log, "Found " + subSequence, example.getExceptionCause().getMessage());
     assertFalse(log, log.contains(DELETING));
   }

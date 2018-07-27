@@ -149,7 +149,10 @@ class CheckSession<T> {
     return generatedNodes.add(node);
   }
 
-  Iteration<T> firstIteration() {
-    return new Iteration<>(this, parameters.globalSeed, 1);
+  void run() {
+    Iteration<T> iteration = new Iteration<>(this, parameters.globalSeed, 1);
+    while (iteration != null) {
+      iteration = iteration.performIteration();
+    }
   }
 }

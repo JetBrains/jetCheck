@@ -40,7 +40,7 @@ public class StatefulGeneratorTest extends PropertyCheckerTestCase {
     Scenario minHistory = checkFalsified(Scenario.scenarios(() -> env -> {
       StringBuilder sb = new StringBuilder();
       env.executeCommands(withRecursion(insertStringCmd(sb), deleteStringCmd(sb), checkDoesNotContain(sb, "A")));
-    }), Scenario::ensureSuccessful, 26).getMinimalCounterexample().getExampleValue();
+    }, s -> {}), Scenario::ensureSuccessful, 26).getMinimalCounterexample().getExampleValue();
 
     assertEquals("commands:\n" +
                  "  insert A at 0\n" +
@@ -59,7 +59,7 @@ public class StatefulGeneratorTest extends PropertyCheckerTestCase {
       };
 
       env.executeCommands(withRecursion(insertStringCmd(sb), replace, deleteStringCmd(sb), checkDoesNotContain(sb, "A")));
-    }), Scenario::ensureSuccessful, 43).getMinimalCounterexample().getExampleValue();
+    }, s -> {}), Scenario::ensureSuccessful, 43).getMinimalCounterexample().getExampleValue();
 
     assertEquals("commands:\n" +
                  "  insert A at 0\n" +
@@ -191,7 +191,7 @@ class InsertChar {
     this.index = index;
   }
 
-  public void performOperation(StringBuilder sb) {
+  private void performOperation(StringBuilder sb) {
     sb.insert(index, c);
   }
 

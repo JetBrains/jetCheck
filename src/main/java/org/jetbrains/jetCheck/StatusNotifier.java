@@ -83,8 +83,14 @@ class StatusNotifier {
     System.out.println("Generator tried to read past the end of serialized data, so it seems the failure isn't reproducible anymore");
   }
 
-  <T> void beforePropertyCheck(T value) {
+  void logEntryReceived(String entry) {
     if (parameters.printValues) {
+      System.out.println(entry);
+    }
+  }
+
+  <T> void beforePropertyCheck(T value) {
+    if (parameters.printValues && !(value instanceof Scenario)) {
       System.out.println("Checking " + value);
     }
   }

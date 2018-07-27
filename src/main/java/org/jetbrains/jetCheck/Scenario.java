@@ -6,18 +6,21 @@ package org.jetbrains.jetCheck;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 class Scenario {
-  private final List<Object> log = new ArrayList<>();
+  private static final String COMMANDS = "commands:";
+  private final StringBuilder log = new StringBuilder();
   private Throwable failure;
+  private final Consumer<String> logConsumer;
 
-  private Scenario(@NotNull ImperativeCommand cmd, @NotNull GenerationEnvironment data) {
+  private Scenario(@NotNull ImperativeCommand cmd, @NotNull GenerationEnvironment data, Consumer<String> logConsumer) {
+    this.logConsumer = logConsumer;
     try {
-      performCommand(cmd, data, log);
+      performCommand(cmd, data, "");
     }
     catch (DataSerializer.EOFException e) {
       throw e;
@@ -36,14 +39,21 @@ class Scenario {
     }
   }
 
-  private void performCommand(ImperativeCommand command, GenerationEnvironment data, List<Object> log) {
+  private void performCommand(ImperativeCommand command, GenerationEnvironment data, String indent) {
     command.performCommand(new ImperativeCommand.Environment() {
       @Override
       public void logMessage(@NotNull String message) {
         if (data instanceof GenerativeDataStructure) {
           ((GenerativeDataStructure) data).ensureActiveStructure();
         }
-        log.add(message);
+
+        if (log.length() == 0) {
+          log.append(COMMANDS);
+          logConsumer.accept(COMMANDS);
+        }
+        String logEntry = indent + message;
+        log.append("\n").append(logEntry);
+        logConsumer.accept(logEntry);
       }
 
       @Override
@@ -79,9 +89,7 @@ class Scenario {
         return Generator.from(new EquivalentGenerator<Object>() {
           @Override
           public Object apply(GenerationEnvironment cmdData) {
-            List<Object> localLog = new ArrayList<>();
-            log.add(localLog);
-            performCommand(safeGenerate(cmdData, cmdGen), cmdData, localLog);
+            performCommand(safeGenerate(cmdData, cmdGen), cmdData, indent + "  ");
             return null;
           }
         });
@@ -102,7 +110,7 @@ class Scenario {
 
   @Override
   public boolean equals(Object o) {
-    return this == o || o instanceof Scenario && log.equals(((Scenario)o).log);
+    return this == o || o instanceof Scenario && toString().equals(o.toString());
   }
 
   @Override
@@ -112,22 +120,9 @@ class Scenario {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-    printLog(sb, "", log);
-    return "commands:" + (sb.length() == 0 ? "<none>" : sb.toString());
+    return log.length() == 0 ? COMMANDS + "<none>" : log.toString();
   }
   
-  private static void printLog(StringBuilder sb, String indent, List<Object> log) {
-    for (Object o : log) {
-      if (o instanceof String) {
-        sb.append("\n").append(indent).append(o);
-      } else {
-        //noinspection unchecked
-        printLog(sb, indent + "  ", (List)o);
-      }
-    }
-  }
-
   boolean ensureSuccessful() {
     if (failure instanceof Error) throw (Error)failure;
     if (failure instanceof RuntimeException) throw (RuntimeException)failure;
@@ -135,8 +130,8 @@ class Scenario {
     return true;
   }
 
-  static Generator<Scenario> scenarios(@NotNull Supplier<? extends ImperativeCommand> command) {
-    return Generator.from(data -> new Scenario(command.get(), data));
+  static Generator<Scenario> scenarios(@NotNull Supplier<? extends ImperativeCommand> command, Consumer<String> logConsumer) {
+    return Generator.from(data -> new Scenario(command.get(), data, logConsumer));
   }
 
   private static abstract class EquivalentGenerator<T> implements Function<GenerationEnvironment, T> {

@@ -167,11 +167,11 @@ public class PropertyChecker {
      * on random data repeatedly for some number of times (see {@link #withIterationCount(int)}).
      */
     public <T> void forAll(Generator<T> generator, Predicate<T> property) {
-      Iteration<T> iteration = new CheckSession<>(serializedData == null ? generator : generator.noShrink(),
-                                                  property, this).firstIteration();
-      while (iteration != null) {
-        iteration = iteration.performIteration();
-      }
+      createSession(generator, property).run();
+    }
+
+    private <T> CheckSession<T> createSession(Generator<T> generator, Predicate<T> property) {
+      return new CheckSession<>(serializedData == null ? generator : generator.noShrink(), property, this);
     }
 
     /**
@@ -179,7 +179,11 @@ public class PropertyChecker {
      * @param command a supplier for a top-level command. This supplier should not have any side effects. 
      */
     public void checkScenarios(@NotNull Supplier<? extends ImperativeCommand> command) {
-      forAll(Scenario.scenarios(command), Scenario::ensureSuccessful);
+      StatusNotifier[] notifier = new StatusNotifier[1];
+      Generator<Scenario> generator = Scenario.scenarios(command, s -> notifier[0].logEntryReceived(s));
+      CheckSession<Scenario> session = createSession(generator, Scenario::ensureSuccessful);
+      notifier[0] = session.notifier;
+      session.run();
     }
 
   }
