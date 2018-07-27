@@ -47,7 +47,7 @@ class Scenario {
           ((GenerativeDataStructure) data).ensureActiveStructure();
         }
 
-        if (log.length() == 0) {
+        if (hasEmptyLog()) {
           log.append(COMMANDS);
           logConsumer.accept(COMMANDS);
         }
@@ -120,9 +120,13 @@ class Scenario {
 
   @Override
   public String toString() {
-    return log.length() == 0 ? COMMANDS + "<none>" : log.toString();
+    return hasEmptyLog() ? COMMANDS + "<none>" : log.toString();
   }
-  
+
+  boolean hasEmptyLog() {
+    return log.length() == 0;
+  }
+
   boolean ensureSuccessful() {
     if (failure instanceof Error) throw (Error)failure;
     if (failure instanceof RuntimeException) throw (RuntimeException)failure;

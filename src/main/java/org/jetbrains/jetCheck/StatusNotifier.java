@@ -90,9 +90,13 @@ class StatusNotifier {
   }
 
   <T> void beforePropertyCheck(T value) {
-    if (parameters.printValues && !(value instanceof Scenario)) {
+    if (parameters.printValues && !isAlreadyPrinted(value)) {
       System.out.println("Checking " + value);
     }
+  }
+
+  private boolean isAlreadyPrinted(Object value) {
+    return value instanceof Scenario && !((Scenario) value).hasEmptyLog();
   }
 
   void propertyCheckFailed(@Nullable Throwable exception) {
