@@ -118,6 +118,7 @@ public class PropertyChecker {
      * If a check fails, this is also printed. Can be useful to get an impression of how good the generators are, and for debugging purposes.
      * @return this
      */
+    @SuppressWarnings("unused")
     public Parameters printGeneratedValues() {
       if (silent) throw new IllegalStateException("'printGeneratedValues' is incompatible with 'silent'");
       printValues = true;
@@ -129,6 +130,7 @@ public class PropertyChecker {
      * Rarely needed, requires some understanding of the checker internals.
      * @return th
      */
+    @SuppressWarnings("unused")
     public Parameters printRawData() {
       if (silent) throw new IllegalStateException("'printRawData' is incompatible with 'silent'");
       printData = true;
