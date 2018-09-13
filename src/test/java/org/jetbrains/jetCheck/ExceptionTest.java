@@ -134,4 +134,23 @@ public class ExceptionTest extends PropertyCheckerTestCase {
       assertEquals(0, e.getFailure().getTotalShrinkingExampleCount());
     }
   }
+
+  public void testNonReproducibleFailureBecauseOfGeneratorException() {
+    AtomicBoolean failed = new AtomicBoolean();
+    try {
+      PropertyChecker.customized().silent().forAll(Generator.from(e -> {
+        if (failed.get()) {
+          throw new AssertionError("some failure");
+        }
+        return 0;
+      }), i -> {
+        failed.set(true);
+        return false;
+      });
+      fail();
+    } catch (PropertyFalsified e) {
+      assertTrue(e.getMessage(), e.getMessage().contains(PropertyFalsified.NOT_REPRODUCIBLE));
+      assertEquals(0, e.getFailure().getTotalShrinkingExampleCount());
+    }
+  }
 }

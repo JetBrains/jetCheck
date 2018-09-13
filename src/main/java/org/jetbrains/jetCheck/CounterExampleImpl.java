@@ -42,7 +42,8 @@ class CounterExampleImpl<T> implements PropertyFailure.CounterExample<T> {
     iteration.session.notifier.beforeReproducing(data);
     try {
       return checkProperty(iteration, iteration.generateValue(createReplayData()), data) != null;
-    } catch (CannotRestoreValue e) {
+    } catch (Throwable e) {
+      iteration.session.notifier.replayFailed(e);
       return false;
     }
   }
