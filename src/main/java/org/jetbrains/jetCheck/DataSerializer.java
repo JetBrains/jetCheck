@@ -55,17 +55,17 @@ class DataSerializer {
     return Base64.getEncoder().encodeToString(data.toByteArray());
   }
 
-  static void deserializeInto(String data, PropertyChecker.Parameters parameters) {
+  static PropertyChecker.Parameters deserializeInto(String data, PropertyChecker.Parameters parameters) {
     ByteArrayInputStream stream = new ByteArrayInputStream(Base64.getDecoder().decode(data));
 
     int seedHigh = readINT(stream);
     int seedLow = readINT(stream);
-    parameters.globalSeed = (long)seedHigh << 32 | seedLow & 0xFFFFFFFFL;
+    long globalSeed = (long)seedHigh << 32 | seedLow & 0xFFFFFFFFL;
 
     int hint = readINT(stream);
-    parameters.sizeHintFun = __ -> hint;
-
-    parameters.serializedData = new SerializedIntSource(stream);
+    SerializedIntSource serializedData = new SerializedIntSource(stream);
+    return new PropertyChecker.Parameters(globalSeed, serializedData, __ -> hint, 1,
+            parameters.silent, parameters.printValues, parameters.printData);
   }
 
   @NotNull

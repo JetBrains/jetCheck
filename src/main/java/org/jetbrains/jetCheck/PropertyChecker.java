@@ -35,20 +35,27 @@ public class PropertyChecker {
    * @return a "parameters" object that where some checker settings can be changed 
    */
   public static Parameters customized() {
-    return new Parameters();
+    return new Parameters(new Random().nextLong(), null, iteration -> (iteration - 1) % DEFAULT_MAX_SIZE_HINT + 1, null, false, false, false);
   }
 
   @SuppressWarnings("UseOfSystemOutOrSystemErr")
   public static class Parameters {
-    long globalSeed = new Random().nextLong();
-    @Nullable IntSource serializedData;
-    IntUnaryOperator sizeHintFun = iteration -> (iteration - 1) % DEFAULT_MAX_SIZE_HINT + 1;
-    @Nullable private Integer iterationCount;
-    boolean silent;
-    boolean printValues;
-    boolean printData;
+    final long globalSeed;
+    @Nullable final IntSource serializedData;
+    final IntUnaryOperator sizeHintFun;
+    @Nullable private final Integer iterationCount;
+    final boolean silent;
+    final boolean printValues;
+    final boolean printData;
 
-    private Parameters() {
+    Parameters(long globalSeed, @Nullable IntSource serializedData, IntUnaryOperator sizeHintFun, @Nullable Integer iterationCount, boolean silent, boolean printValues, boolean printData) {
+      this.globalSeed = globalSeed;
+      this.serializedData = serializedData;
+      this.sizeHintFun = sizeHintFun;
+      this.iterationCount = iterationCount;
+      this.silent = silent;
+      this.printValues = printValues;
+      this.printData = printData;
     }
 
     /**
@@ -68,8 +75,7 @@ public class PropertyChecker {
         return this;
       }
 
-      globalSeed = seed;
-      return this;
+      return new Parameters(seed, serializedData, sizeHintFun, iterationCount, silent, printValues, printData);
     }
 
     /**
@@ -89,8 +95,12 @@ public class PropertyChecker {
         }
         return this;
       }
-      this.iterationCount = iterationCount;
-      return this;
+      return withForcedIterationCount(iterationCount);
+    }
+
+    @NotNull
+    private Parameters withForcedIterationCount(int iterationCount) {
+      return new Parameters(globalSeed, serializedData, sizeHintFun, iterationCount, silent, printValues, printData);
     }
 
     /**
@@ -106,8 +116,7 @@ public class PropertyChecker {
         return this;
       }
 
-      this.sizeHintFun = sizeHintFun;
-      return this;
+      return new Parameters(globalSeed, serializedData, sizeHintFun, iterationCount, silent, printValues, printData);
     }
 
     /**
@@ -117,8 +126,7 @@ public class PropertyChecker {
     public Parameters silent() {
       if (printValues) throw new IllegalStateException("'silent' is incompatible with 'printGeneratedValues'");
       if (printData) throw new IllegalStateException("'silent' is incompatible with 'printRawData'");
-      this.silent = true;
-      return this;
+      return new Parameters(globalSeed, serializedData, sizeHintFun, iterationCount, true, printValues, printData);
     }
 
     /**
@@ -129,8 +137,7 @@ public class PropertyChecker {
     @SuppressWarnings("unused")
     public Parameters printGeneratedValues() {
       if (silent) throw new IllegalStateException("'printGeneratedValues' is incompatible with 'silent'");
-      printValues = true;
-      return this;
+      return new Parameters(globalSeed, serializedData, sizeHintFun, iterationCount, silent, true, printData);
     }
 
     /**
@@ -141,8 +148,7 @@ public class PropertyChecker {
     @SuppressWarnings("unused")
     public Parameters printRawData() {
       if (silent) throw new IllegalStateException("'printRawData' is incompatible with 'silent'");
-      printData = true;
-      return this;
+      return new Parameters(globalSeed, serializedData, sizeHintFun, iterationCount, silent, printValues, true);
     }
 
     /**
@@ -154,8 +160,7 @@ public class PropertyChecker {
     @Deprecated
     @SuppressWarnings("DeprecatedIsStillUsed")
     public Parameters recheckingIteration(long seed, int sizeHint) {
-      iterationCount = null;
-      return withSeed(seed).withSizeHint(whatever -> sizeHint).withIterationCount(1);
+      return withForcedIterationCount(1).withSeed(seed).withSizeHint(whatever -> sizeHint);
     }
 
     /**
@@ -168,9 +173,7 @@ public class PropertyChecker {
     @Deprecated
     @SuppressWarnings("DeprecatedIsStillUsed")
     public Parameters rechecking(@NotNull String serializedData) {
-      this.iterationCount = 1;
-      DataSerializer.deserializeInto(serializedData, this);
-      return this;
+      return DataSerializer.deserializeInto(serializedData, this);
     }
 
     /**
