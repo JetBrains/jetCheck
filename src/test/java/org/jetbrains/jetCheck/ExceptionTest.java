@@ -117,4 +117,21 @@ public class ExceptionTest extends PropertyCheckerTestCase {
     checkFails(PropertyChecker.customized().rechecking(e.getFailure().getMinimalCounterexample().getSerializedData()), gen, prop);
     assertEquals(1, runCount.get());
   }
+
+  public void testNonReproducibleFailureByCannotRestore() {
+    AtomicBoolean failed = new AtomicBoolean();
+    try {
+      PropertyChecker.customized().silent().checkScenarios(() -> env -> {
+        if (failed.get()) {
+          env.generateValue(integers(0, 10), "%s");
+        }
+        failed.set(true);
+        throw new AssertionError("failed");
+      });
+      fail();
+    } catch (PropertyFalsified e) {
+      assertTrue(e.getMessage(), e.getMessage().contains(PropertyFalsified.NOT_REPRODUCIBLE));
+      assertEquals(0, e.getFailure().getTotalShrinkingExampleCount());
+    }
+  }
 }
