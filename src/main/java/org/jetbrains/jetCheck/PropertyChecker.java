@@ -43,7 +43,7 @@ public class PropertyChecker {
     long globalSeed = new Random().nextLong();
     @Nullable IntSource serializedData;
     IntUnaryOperator sizeHintFun = iteration -> (iteration - 1) % DEFAULT_MAX_SIZE_HINT + 1;
-    int iterationCount = 100;
+    @Nullable private Integer iterationCount;
     boolean silent;
     boolean printValues;
     boolean printData;
@@ -78,7 +78,15 @@ public class PropertyChecker {
      */
     public Parameters withIterationCount(int iterationCount) {
       if (serializedData != null) {
-        System.err.println("withIterationCount ignored, because 'rechecking' is used");
+        if (!silent) {
+          System.err.println("withIterationCount ignored, because 'rechecking' is used");
+        }
+        return this;
+      }
+      if (this.iterationCount != null) {
+        if (!silent) {
+          System.err.println("withIterationCount ignored, because iteration count is already set to " + this.iterationCount);
+        }
         return this;
       }
       this.iterationCount = iterationCount;
@@ -146,6 +154,7 @@ public class PropertyChecker {
     @Deprecated
     @SuppressWarnings("DeprecatedIsStillUsed")
     public Parameters recheckingIteration(long seed, int sizeHint) {
+      iterationCount = null;
       return withSeed(seed).withSizeHint(whatever -> sizeHint).withIterationCount(1);
     }
 
@@ -186,6 +195,10 @@ public class PropertyChecker {
       CheckSession<Scenario> session = createSession(generator, Scenario::ensureSuccessful);
       notifier[0] = session.notifier;
       session.run();
+    }
+
+    int getIterationCount() {
+      return iterationCount != null ? iterationCount : 100;
     }
 
   }

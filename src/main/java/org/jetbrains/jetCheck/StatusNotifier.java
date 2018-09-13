@@ -26,7 +26,7 @@ class StatusNotifier {
   void iterationStarted(int iteration) {
     currentIteration = iteration;
     if (shouldPrint()) {
-      System.out.println(formatCurrentTime() + ": iteration " + currentIteration + " of " + parameters.iterationCount + "...");
+      System.out.println(formatCurrentTime() + ": iteration " + currentIteration + " of " + parameters.getIterationCount() + "...");
     }
   }
 

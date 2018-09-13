@@ -114,7 +114,7 @@ class Iteration<T> {
       throw new PropertyFalsified(new PropertyFailureImpl<>(example, this));
     }
 
-    if (iterationNumber >= session.parameters.iterationCount) {
+    if (iterationNumber >= session.parameters.getIterationCount()) {
       return null;
     }
     

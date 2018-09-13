@@ -4,6 +4,7 @@
 package org.jetbrains.jetCheck;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -144,6 +145,22 @@ public class GeneratorTest extends PropertyCheckerTestCase {
 
     e = checkFails(PropertyChecker.customized().withSeed(failure.getGlobalSeed()), gen, property);
     assertEquals(failure.getIterationNumber(), e.getFailure().getIterationNumber());
+  }
+
+  public void testRecheckingIterationPrecedenceOverWithIterationCount() {
+    AtomicInteger count = new AtomicInteger();
+    Predicate<Integer> prop = i -> {
+      count.incrementAndGet();
+      return true;
+    };
+
+    //noinspection deprecation
+    PropertyChecker.customized().recheckingIteration(2, 3).withIterationCount(10).forAll(integers(), prop);
+    assertEquals(1, count.get());
+
+    //noinspection deprecation
+    PropertyChecker.customized().withIterationCount(10).recheckingIteration(2, 3).forAll(integers(), prop);
+    assertEquals(2, count.get());
   }
 
   public void testSameFrequency() {
