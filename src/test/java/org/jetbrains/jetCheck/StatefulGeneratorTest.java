@@ -32,7 +32,7 @@ public class StatefulGeneratorTest extends PropertyCheckerTestCase {
     });
     List<InsertChar> minCmds = checkGeneratesExample(gen,
                                                      cmds -> InsertChar.performOperations(cmds).contains("ab"),
-                                                     17);
+                                                     23);
     assertEquals(minCmds.toString(), 2, minCmds.size());
   }
 
@@ -40,7 +40,7 @@ public class StatefulGeneratorTest extends PropertyCheckerTestCase {
     Scenario minHistory = checkFalsified(Scenario.scenarios(() -> env -> {
       StringBuilder sb = new StringBuilder();
       env.executeCommands(withRecursion(insertStringCmd(sb), deleteStringCmd(sb), checkDoesNotContain(sb, "A")));
-    }, s -> {}), Scenario::ensureSuccessful, 26).getMinimalCounterexample().getExampleValue();
+    }, s -> {}), Scenario::ensureSuccessful, 13).getMinimalCounterexample().getExampleValue();
 
     assertEquals("commands:\n" +
                  "  insert A at 0\n" +
@@ -59,7 +59,7 @@ public class StatefulGeneratorTest extends PropertyCheckerTestCase {
       };
 
       env.executeCommands(withRecursion(insertStringCmd(sb), replace, deleteStringCmd(sb), checkDoesNotContain(sb, "A")));
-    }, s -> {}), Scenario::ensureSuccessful, 43).getMinimalCounterexample().getExampleValue();
+    }, s -> {}), Scenario::ensureSuccessful, 87).getMinimalCounterexample().getExampleValue();
 
     assertEquals("commands:\n" +
                  "  insert A at 0\n" +

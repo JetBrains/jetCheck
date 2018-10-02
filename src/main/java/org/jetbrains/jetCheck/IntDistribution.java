@@ -23,9 +23,18 @@ public interface IntDistribution {
   static IntDistribution uniform(int min, int max) {
     return new BoundedIntDistribution(min, max, r -> {
       if (min == max) return min;
-      
-      int i = r.nextInt();
-      return i >= min && i <= max ? i : Math.abs(i) % (max - min + 1) + min;
+
+      int range = max - min + 1;
+      if (range > 0) {
+        return r.nextInt(range) + min;
+      }
+
+      while (true) {
+        int i = r.nextInt();
+        if (i >= min && i <= max) {
+          return i;
+        }
+      }
     });
   }
 

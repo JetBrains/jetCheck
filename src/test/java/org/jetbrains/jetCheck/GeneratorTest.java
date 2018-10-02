@@ -24,36 +24,36 @@ public class GeneratorTest extends PropertyCheckerTestCase {
   public void testListSumMod() {
     checkFalsified(nonEmptyLists(integers()),
                    l -> l.stream().mapToInt(Integer::intValue).sum() % 10 != 0,
-                   301);
+                   2);
   }
 
   public void testListContainsDivisible() {
     checkGeneratesExample(nonEmptyLists(integers()),
                           l -> l.stream().anyMatch(i -> i % 10 == 0),
-                          4);
+                          2);
   }
 
   public void testStringContains() {
     assertEquals("a", checkGeneratesExample(stringsOf(asciiPrintableChars()),
                                             s -> s.contains("a"),
-                                            10));
+                                            8));
 
     String aWithB = checkGeneratesExample(stringsOf(IntDistribution.uniform(2, 100), asciiPrintableChars()),
                                      s -> s.contains("a") && s.contains("b"),
-                                     27);
+                                     33);
     assertTrue(aWithB, "ab".equals(aWithB) || "ba".equals(aWithB));
   }
 
   public void testLetterStringContains() {
     checkFalsified(stringsOf(asciiLetters()),
                    s -> !s.contains("a"),
-                   1);
+                   2);
   }
 
   public void testIsSorted() {
     PropertyFailure<List<Integer>> failure = checkFalsified(nonEmptyLists(integers()),
                                                             l -> l.stream().sorted().collect(Collectors.toList()).equals(l),
-                                                            36);
+                                                            35);
     List<Integer> value = failure.getMinimalCounterexample().getExampleValue();
     assertEquals(2, value.size());
     assertTrue(value.toString(), value.stream().allMatch(i -> Math.abs(i) < 2));
@@ -66,7 +66,7 @@ public class GeneratorTest extends PropertyCheckerTestCase {
   public void testSortedDoublesNonDescending() {
     PropertyFailure<List<Double>> failure = checkFalsified(listsOf(doubles()),
                                                            l -> isSorted(l.stream().sorted().collect(Collectors.toList())),
-                                                           23);
+                                                           35);
     assertEquals(2, failure.getMinimalCounterexample().getExampleValue().size());
   }
 
@@ -90,7 +90,7 @@ public class GeneratorTest extends PropertyCheckerTestCase {
   public void testStringOfStringChecksAllChars() {
     checkFalsified(stringsOf("abc "),
                    s -> !s.contains(" "),
-                   0);
+                   1);
   }
 
   public void testListNotLongerThanMaxDefaultSize() {
@@ -120,7 +120,7 @@ public class GeneratorTest extends PropertyCheckerTestCase {
                            s -> Character.isJavaIdentifierStart(s.charAt(0)) && s.chars().allMatch(Character::isJavaIdentifierPart));
     checkGeneratesExample(asciiIdentifiers(),
                           s -> s.contains("_"),
-                          9);
+                          10);
   }
 
   public void testBoolean() {
@@ -155,7 +155,7 @@ public class GeneratorTest extends PropertyCheckerTestCase {
     };
 
     //noinspection deprecation
-    PropertyChecker.customized().recheckingIteration(2, 3).withIterationCount(10).forAll(integers(), prop);
+    PropertyChecker.customized().silent().recheckingIteration(2, 3).withIterationCount(10).forAll(integers(), prop);
     assertEquals(1, count.get());
 
     //noinspection deprecation
@@ -166,7 +166,7 @@ public class GeneratorTest extends PropertyCheckerTestCase {
   public void testSameFrequency() {
     checkFalsified(listsOf(frequency(1, constant(1), 1, constant(2))),
                    l -> !l.contains(1) || !l.contains(2),
-                   2);
+                   3);
 
     LinkedHashMap<Generator<? extends Integer>, Integer> map = new LinkedHashMap<>();
     map.put(constant(1), 1);
@@ -174,7 +174,7 @@ public class GeneratorTest extends PropertyCheckerTestCase {
     map.put(constant(3), 1);
     checkFalsified(listsOf(frequency(map)),
                    l -> !l.contains(1) || !l.contains(2) || !l.contains(3),
-                   5);
+                   4);
   }
 
   public void testReplay() {
@@ -182,7 +182,7 @@ public class GeneratorTest extends PropertyCheckerTestCase {
     PropertyFailure<List<Integer>> failure = checkFalsified(listsOf(integers(0, 100)), l -> {
       log.add(l);
       return !l.contains(42);
-    }, 9);
+    }, 12);
     List<Integer> goldMin = Collections.singletonList(42);
 
     PropertyFailure.CounterExample<List<Integer>> first = failure.getFirstCounterExample();

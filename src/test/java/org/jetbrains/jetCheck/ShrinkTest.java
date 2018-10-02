@@ -22,13 +22,13 @@ public class ShrinkTest extends PropertyCheckerTestCase {
                      String s = l.toString();
                      return !"abcdefghijklmnopqrstuvwxyz()[]#!".chars().allMatch(c -> s.indexOf((char)c) >= 0);
                    },
-                   371);
+                   308);
   }
 
   public void testShrinkingNonEmptyList() {
     List<Integer> list = checkGeneratesExample(nonEmptyLists(integers(0, 100)),
                                                l -> l.contains(42),
-                                               12);
+                                               6);
     assertEquals(1, list.size());
   }
 
@@ -80,7 +80,7 @@ public class ShrinkTest extends PropertyCheckerTestCase {
     assertEquals(Arrays.asList(0, 0, 0, 0, 1), checkGeneratesExample(gen, ints -> {
       int zeroIndex = ints.lastIndexOf(0);
       return ints.size() >= 5 && zeroIndex >= 0 && zeroIndex != ints.size() - 1;
-    }, 29));
+    }, 21));
   }
 
 
