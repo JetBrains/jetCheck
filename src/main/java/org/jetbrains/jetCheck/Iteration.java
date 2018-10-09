@@ -21,7 +21,6 @@ class Iteration<T> {
       return ": cannot generate enough sufficiently different values";
     }
   };
-  private static final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(0);
 
   final CheckSession<T> session;
   long iterationSeed;
@@ -51,7 +50,7 @@ class Iteration<T> {
         initSeed(random.nextLong());
       }
 
-      ScheduledFuture<?> printSeeds = executor.schedule(
+      ScheduledFuture<?> printSeeds = session.executor.schedule(
               () -> System.out.println("An iteration is running for too long, " + printSeeds()),
               1, TimeUnit.MINUTES);
       try {
@@ -127,6 +126,7 @@ class Iteration<T> {
 }
 
 class CheckSession<T> {
+  final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(0);
   final Generator<T> generator;
   final Predicate<T> property;
   final PropertyChecker.Parameters parameters;
@@ -150,9 +150,24 @@ class CheckSession<T> {
   }
 
   void run() {
-    Iteration<T> iteration = new Iteration<>(this, parameters.globalSeed, 1);
-    while (iteration != null) {
-      iteration = iteration.performIteration();
+    try {
+      Iteration<T> iteration = new Iteration<>(this, parameters.globalSeed, 1);
+      while (iteration != null) {
+        iteration = iteration.performIteration();
+      }
+    } finally {
+      shutdownExecutor();
+    }
+  }
+
+  private void shutdownExecutor() {
+    executor.shutdownNow();
+    try {
+      if (!executor.awaitTermination(1, TimeUnit.MINUTES)) {
+        throw new IllegalStateException("Cannot shutdown jetCheck internal executor");
+      }
+    } catch (InterruptedException e) {
+      throw new RuntimeException("Cannot shutdown jetCheck internal executor", e);
     }
   }
 }
