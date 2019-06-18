@@ -158,7 +158,7 @@ public class Generator<T> {
   }
 
   /** Delegates to one of the generators in map keys with probability corresponding to the weights in values*/
-  public static <T> Generator<T> frequency(Map<Generator<? extends T>, Integer> alternatives) {
+  public static <T> Generator<T> frequency(LinkedHashMap<Generator<? extends T>, Integer> alternatives) {
     ArrayList<Generator<? extends T>> keys = new ArrayList<>();
     List<Integer> weights = new ArrayList<>();
     for (Map.Entry<Generator<? extends T>, Integer> entry : alternatives.entrySet()) {
