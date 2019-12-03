@@ -134,7 +134,9 @@ class Iteration<T> {
 }
 
 class CheckSession<T> {
-  final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(0);
+  private static final String EXECUTOR_NAME = "jetCheck internal executor";
+  final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(0,
+          r -> new Thread(r, EXECUTOR_NAME));
   final Generator<T> generator;
   final Predicate<T> property;
   final PropertyChecker.Parameters parameters;
@@ -172,10 +174,10 @@ class CheckSession<T> {
     executor.shutdownNow();
     try {
       if (!executor.awaitTermination(1, TimeUnit.MINUTES)) {
-        throw new IllegalStateException("Cannot shutdown jetCheck internal executor");
+        throw new IllegalStateException("Cannot shutdown " + EXECUTOR_NAME);
       }
     } catch (InterruptedException e) {
-      throw new RuntimeException("Cannot shutdown jetCheck internal executor", e);
+      throw new RuntimeException("Cannot shutdown " + EXECUTOR_NAME, e);
     }
   }
 }
