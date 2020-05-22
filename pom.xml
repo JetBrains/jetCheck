@@ -6,7 +6,7 @@
 
     <groupId>org.jetbrains</groupId>
     <artifactId>jetCheck</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.2.2-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -56,4 +56,10 @@
         </plugins>
     </build>
 
+    <distributionManagement>
+        <repository>
+            <id>bintray-jetbrains-intellij-third-party-dependencies</id>
+            <url>https://api.bintray.com/maven/jetbrains/intellij-third-party-dependencies/jetCheck/;publish=1</url>
+        </repository>
+    </distributionManagement>
 </project>
