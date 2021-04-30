@@ -59,7 +59,7 @@ public class PropertyChecker {
     }
 
     /**
-     * This function allows to start the test with a fixed random seed. It's useful to reproduce some previous test run and debug it.
+     * This function allows starting the test with a fixed random seed. It's useful to reproduce some previous test, run and debug it.
      * @param seed A random seed to use for the first iteration.
      *             The following iterations will use other, pseudo-random seeds, but still derived from this one.
      * @return this
@@ -68,7 +68,6 @@ public class PropertyChecker {
      * For regression testing, it's recommended to code the failing scenario explicitly.
      */
     @Deprecated
-    @SuppressWarnings("DeprecatedIsStillUsed")
     public Parameters withSeed(long seed) {
       if (serializedData != null) {
         System.err.println("withSeed ignored, because 'rechecking' is used");
@@ -79,7 +78,7 @@ public class PropertyChecker {
     }
 
     /**
-     * @param iterationCount the number of iterations to try. By default it's 100.
+     * @param iterationCount the number of iterations to try. By default, it's 100.
      * @return this
      */
     public Parameters withIterationCount(int iterationCount) {
@@ -105,7 +104,7 @@ public class PropertyChecker {
 
     /**
      * @param sizeHintFun a function determining how size hint should be distributed depending on the iteration number.
-     *                    By default the size hint will be 1 in the first iteration, 2 in the second one, and so on until 100,
+     *                    By default, the size hint will be 1 in the first iteration, 2 in the second one, and so on until 100,
      *                    then again 1,...,100,1,...,100, etc.
      * @return this
      * @see GenerationEnvironment#getSizeHint()
@@ -130,8 +129,8 @@ public class PropertyChecker {
     }
 
     /**
-     * Enables verbose mode, when for every execution of property check all the generated values are printed to the stdout.
-     * If a check fails, this is also printed. Can be useful to get an impression of how good the generators are, and for debugging purposes.
+     * Enables a verbose mode, when for every execution of property checking all the generated values are printed to the STDOUT.
+     * If a check fails, this is also printed. This can be useful to get an impression of how good the generators are, and for debugging purposes.
      * @return this
      */
     @SuppressWarnings("unused")
@@ -142,8 +141,7 @@ public class PropertyChecker {
 
     /**
      * During shrinking, prints the raw underlying data used to feed generators.
-     * Rarely needed, requires some understanding of the checker internals.
-     * @return th
+     * Rarely needed, as it requires some understanding of the checker internals.
      */
     @SuppressWarnings("unused")
     public Parameters printRawData() {
@@ -158,7 +156,6 @@ public class PropertyChecker {
      * For regression testing, it's recommended to code the failing scenario explicitly.
      */
     @Deprecated
-    @SuppressWarnings("DeprecatedIsStillUsed")
     public Parameters recheckingIteration(long seed, int sizeHint) {
       return withForcedIterationCount(1).withSeed(seed).withSizeHint(whatever -> sizeHint);
     }
@@ -171,7 +168,6 @@ public class PropertyChecker {
      * For regression testing, it's recommended to code the failing scenario explicitly.
      */
     @Deprecated
-    @SuppressWarnings("DeprecatedIsStillUsed")
     public Parameters rechecking(@NotNull String serializedData) {
       return DataSerializer.deserializeInto(serializedData, this);
     }

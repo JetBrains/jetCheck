@@ -30,7 +30,7 @@ public class Generator<T> {
   }
 
   /**
-   * Creates a generator from a custom function, that creates objects of the given type based on the data from {@link GenerationEnvironment}.
+   * Creates a generator from a custom function that creates objects of the given type based on the data from {@link GenerationEnvironment}.
    * The generator may invoke other, more primitive, generators using {@link GenerationEnvironment#generate(Generator)}.<p></p>
    * 
    * When a property is falsified, the GenerationEnvironment is attempted to be minimized (shrunk), and the generator will be run on
@@ -38,7 +38,7 @@ public class Generator<T> {
    * 
    * To ensure test reproducibility during re-run or shrinking phase,
    * the result of the generators should only depend on the GenerationEnvironment. Generators should not have any side effects
-   * or depend on the outside world. Generators may have internal mutable state accessible to other (nested) generators,
+   * or depend on the outside world. Generators may have an internal mutable state accessible to other (nested) generators,
    * but that's error-prone, difficult and computationally expensive to shrink. If you still think you need that,
    * please see {@link ImperativeCommand} for potentially more convenient way of testing stateful systems.
    */
@@ -77,7 +77,7 @@ public class Generator<T> {
    * Turns off automatic shrinking for the data produced by this generator (and its components, if any).
    * This can be useful to speed up shrinking by not wasting time on shrinking objects where it makes no sense.
    * It's especially useful when using stateful generators (e.g. {@link ImperativeCommand}), because 
-   * shrinkable values there can lead to doubling of the shrinking time.
+   * shrinkable values there can lead to a doubling of the shrinking time.
    */
   public Generator<T> noShrink() {
     return from(data -> ((AbstractDataStructure)data).generateNonShrinkable(this));
@@ -264,7 +264,7 @@ public class Generator<T> {
     return sb.toString();
   }
 
-  /** Generates random strings consisting ASCII letters and digit and starting with a letter */
+  /** Generates random strings consisting of ASCII letters and digits and starting with a letter */
   public static Generator<String> asciiIdentifiers() {
     return stringsOf(frequency(50, asciiLetters(),
                                5, digits(),

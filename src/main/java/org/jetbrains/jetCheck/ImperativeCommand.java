@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Represents an action with potential side effects, for single-threaded property-based testing of stateful systems.
  * The engine executes a top-level command, which should prepare the system-under-test and run the sequence of nested (actual) commands
- * that change the system, check the needed invariants, and log all activity to allow to reproduce failing scenarios.<p></p>
+ * that change the system, check the needed invariants, and log all activity to allow reproducing failing scenarios.<p></p>
  * 
  * A typical way to test with imperative commands looks like this:
  * <pre>
@@ -66,14 +66,14 @@ public interface ImperativeCommand {
   /** A helper object passed into {@link #performCommand} to allow for logging and ad hoc random data generation */
   interface Environment {
     
-    /** Add a log message. The whole execution log would be printed if the command fails */
+    /** Add a log message. The whole execution log would be printed if the command fails. */
     void logMessage(@NotNull String message);
     
     /** Generate a pseudo-random value using the given generator.
      * Optionally log a message, so that when a test fails, you'd know the value was generated.
      * The message is a Java format string, so you can use it to include the generated value, e.g.
      * {@code String s = generateValue(stringsOf(asciiLetters(), "Generated %s")}.<p></p>
-     * If you don't want to generate message, or would like to show the generated value in a custom way, pass {@code null}.
+     * If you don't want to generate a message, or would like to show the generated value in a custom way, pass {@code null}.
      * You can use {@link #logMessage} later to still leave a trace of this value generation in the log.<p></p>
      * 
      * Consider making generators non-shrinkable (by invoking {@link Generator#noShrink()}) where possible
