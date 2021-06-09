@@ -32,10 +32,10 @@ public class Generator<T> {
   /**
    * Creates a generator from a custom function that creates objects of the given type based on the data from {@link GenerationEnvironment}.
    * The generator may invoke other, more primitive, generators using {@link GenerationEnvironment#generate(Generator)}.<p></p>
-   * 
-   * When a property is falsified, the GenerationEnvironment is attempted to be minimized (shrunk), and the generator will be run on
-   * ever "smaller" versions of it.<p></p>
-   * 
+   *
+   * When a property is falsified, the GenerationEnvironment is attempted to be minimized (shrunk),
+   * and the generator will be executed on ever "smaller" versions of it.<p></p>
+   *
    * To ensure test reproducibility during re-run or shrinking phase,
    * the result of the generators should only depend on the GenerationEnvironment. Generators should not have any side effects
    * or depend on the outside world. Generators may have an internal mutable state accessible to other (nested) generators,
@@ -84,7 +84,8 @@ public class Generator<T> {
   }
 
   /**
-   * Attempts to generate the value several times, until one comes out that satisfies the given condition. That value is returned as generator result.
+   * Attempts to generate the value several times, until one comes out that satisfies the given condition.
+   * That value is returned as the generator result.
    * Results of all previous attempts are discarded. During shrinking, the underlying data structures from those attempts
    * won't be used for re-running generation, so be careful that those attempts don't leave any traces of themselves 
    * (e.g. side effects, even ones internal to an outer generator).<p></p>
@@ -176,18 +177,12 @@ public class Generator<T> {
     });
   }
 
-  /** Gets the data from two generators and invokes the given function to produce a result based on the two generated values. */
+  /** Get the data from two generators and invokes the given function to produce a result based on the two generated values. */
   public static <A,B,C> Generator<C> zipWith(Generator<A> gen1, Generator<B> gen2, BiFunction<? super A, ? super B, ? extends C> zip) {
     return from(data -> zip.apply(data.generate(gen1), data.generate(gen2)));
   }
 
   /**
-   * A fixed-point combinator to easily create recursive generators by giving a name to the whole generator and allowing to reuse it inside itself. For example, a recursive tree generator could be defined as follows by binding itself to the name {@code nodes}:
-   * <pre>
-   * Generator&lt;Node&gt; gen = Generator.recursive(<b>nodes</b> -&gt; Generator.anyOf(
-   *   Generator.constant(new Leaf()),
-   *   Generator.listsOf(<b>nodes</b>).map(children -&gt; new Composite(children))))
-   * </pre>
    * @return the generator returned from the passed function
    */
   @NotNull
@@ -315,7 +310,7 @@ public class Generator<T> {
     return listsOf(itemGenerator).suchThat(l -> !l.isEmpty());
   }
 
-  /** Generates lists of values produced by the given generator. The list length is determined by the given distribution. */
+  /** Generate lists of values produced by the given generator. The list length is determined by the given distribution. */
   public static <T> Generator<List<T>> listsOf(IntDistribution length, Generator<T> itemGenerator) {
     return from(data -> generateList(itemGenerator, data, ((AbstractDataStructure)data).drawInt(length)));
   }

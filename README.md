@@ -7,7 +7,7 @@ jetCheck is a property-based testing library for Java 8+, inspired by [QuickChec
 
 The library is by no means supposed to be feature-complete, and might lack even very basic data generators, if no clients have needed them yet. Improvement suggestions are welcome. 
 
-# What's property-based testing
+# What's property-based testing?
 
 "Property-based testing" means that the library checks very general properties that a program should have, as opposed to specific scenarios in unit testing. In *jetCheck*, a number of random test cases are generated, the property is verified on those test cases, and, if it fails, the test case is automatically minimized and printed.
 
@@ -24,7 +24,7 @@ In [IntelliJ IDEA](https://github.com/JetBrains/intellij-community) and some oth
 * incremental lexer and parser results are consistent with full lexing/parsing 
 * code completion suggests whatever you want to write, doesn't contain duplicates and doesn't fail
 * automatic code transformations don't fail, don't break compilation, don't change in presence of extra parentheses, and don't remove valuable comments
-* all internal representations (of which there's many) built for code are always synchronized
+* all internal representations (of which there are many) built for code are always synchronized
 * sorting algorithms used for completion and Project View obey transitivity contracts
 * and other things
 

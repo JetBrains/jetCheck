@@ -70,7 +70,7 @@ public interface ImperativeCommand {
     void logMessage(@NotNull String message);
     
     /** Generate a pseudo-random value using the given generator.
-     * Optionally log a message, so that when a test fails, you'd know the value was generated.
+     * Optionally, log a message, so that when a test fails, you'd know the value was generated.
      * The message is a Java format string, so you can use it to include the generated value, e.g.
      * {@code String s = generateValue(stringsOf(asciiLetters(), "Generated %s")}.<p></p>
      * If you don't want to generate a message, or would like to show the generated value in a custom way, pass {@code null}.
