@@ -1,4 +1,4 @@
-# jetCheck
+# jetCheck ![Team](https://jb.gg/badges/team-plastic.svg)
  
 jetCheck is a property-based testing library for Java 8+, inspired by [QuickCheck](https://en.wikipedia.org/wiki/QuickCheck) and [Hypothesis](https://hypothesis.works/). Its distinguishing features are:
 * Automatic example minimization: you don't need to manually write shrinkers for your custom data types 
