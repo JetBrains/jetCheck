@@ -6,7 +6,7 @@
 
     <groupId>org.jetbrains</groupId>
     <artifactId>jetCheck</artifactId>
-    <version>0.2.2-SNAPSHOT</version>
+    <version>0.2.3</version>
     <name>jetCheck</name>
     <description>Property-based test framework</description>
     <url>https://github.com/JetBrains/jetCheck</url>
