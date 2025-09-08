@@ -6,7 +6,32 @@
 
     <groupId>org.jetbrains</groupId>
     <artifactId>jetCheck</artifactId>
-    <version>0.2.2-SNAPSHOT</version>
+    <version>0.2.3</version>
+    <name>jetCheck</name>
+    <description>Property-based test framework</description>
+    <url>https://github.com/JetBrains/jetCheck</url>
+
+    <licenses>
+      <license>
+        <name>The Apache License, Version 2.0</name>
+        <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      </license>
+    </licenses>
+
+    <developers>
+      <developer>
+        <id>JetBrains</id>
+        <name>JetBrains Team</name>
+        <organization>JetBrains</organization>
+        <organizationUrl>https://www.jetbrains.com</organizationUrl>
+      </developer>
+    </developers>
+
+    <scm>
+      <url>https://github.com/JetBrains/jetCheck</url>
+      <connection>scm:git:https://github.com/JetBrains/jetCheck.git</connection>
+      <developerConnection>scm:git:ssh://git@github.com/JetBrains/jetCheck.git</developerConnection>
+    </scm>
 
     <dependencies>
         <dependency>
@@ -55,11 +80,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <distributionManagement>
-        <repository>
-            <id>bintray-jetbrains-intellij-third-party-dependencies</id>
-            <url>https://api.bintray.com/maven/jetbrains/intellij-third-party-dependencies/jetCheck/;publish=1</url>
-        </repository>
-    </distributionManagement>
 </project>
