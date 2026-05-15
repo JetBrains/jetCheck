@@ -2,10 +2,10 @@
  
 jetCheck is a property-based testing library for Java 8+, inspired by [QuickCheck](https://en.wikipedia.org/wiki/QuickCheck) and [Hypothesis](https://hypothesis.works/). Its distinguishing features are:
 * Automatic example minimization: you don't need to manually write shrinkers for your custom data types 
-* Re-running of minimized test example: once you've got a failing test, you can re-run (and debug) it without all the intermediate shrinking steps
+* Re-running of the minimized test example: once you've got a failing test, you can re-run (and debug) it without all the intermediate shrinking steps
 * Stateful system testing (single-threaded): you can generate a sequence of commands, and each command generation may depend on the state that previous commands have brought the system into.
 
-The library is by no means supposed to be feature-complete, and might lack even very basic data generators, if no clients have needed them yet. Improvement suggestions are welcome. 
+The library is by no means supposed to be feature-complete and might lack even very basic data generators if no clients have needed them yet. Improvement suggestions are welcome. 
 
 # What's property-based testing?
 
@@ -22,7 +22,7 @@ Some examples of properties:
 In [IntelliJ IDEA](https://github.com/JetBrains/intellij-community) and some other [JetBrains](https://www.jetbrains.com/) IDEs, *jetCheck* is used for checking that:
 * lexer/parser never fail on any text, however broken
 * incremental lexer and parser results are consistent with full lexing/parsing 
-* code completion suggests whatever you want to write, doesn't contain duplicates and doesn't fail
+* code completion suggests whatever you want to write, doesn't contain duplicates, and doesn't fail
 * automatic code transformations don't fail, don't break compilation, don't change in presence of extra parentheses, and don't remove valuable comments
 * all internal representations (of which there are many) built for code are always synchronized
 * sorting algorithms used for completion and Project View obey transitivity contracts
@@ -30,7 +30,17 @@ In [IntelliJ IDEA](https://github.com/JetBrains/intellij-community) and some oth
 
 # How to use jetCheck
 
-You can add *jetCheck* dependency to your project by using [jitpack](https://jitpack.io/#jetbrains/jetCheck). Then, in your normal test method, whatever test framework you're using, call [PropertyChecker](src/main/java/org/jetbrains/jetCheck/PropertyChecker.java). Here's a simple example of a failing property:
+You can add the *jetCheck* dependency to your project from Maven Central:
+```
+<dependency>
+    <groupId>org.jetbrains</groupId>
+    <artifactId>jetCheck</artifactId>
+    <version>0.2.3</version>
+</dependency>
+```
+Or `implementation("org.jetbrains:jetCheck:0.2.3")` in Gradle.
+
+Then, in your normal test method, whatever test framework you're using, call [PropertyChecker](src/main/java/org/jetbrains/jetCheck/PropertyChecker.java). Here's a simple example of a failing property:
 
 `PropertyChecker.forAll(Generator.integers(), i -> i == 42);`
 
