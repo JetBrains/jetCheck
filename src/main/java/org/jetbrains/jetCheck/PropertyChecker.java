@@ -16,6 +16,14 @@ public class PropertyChecker {
   static final int DEFAULT_MAX_SIZE_HINT = 100;
 
   /**
+   * The default limit on how deeply a generator may recurse while producing a single value, before
+   * {@link GeneratorRecursedTooDeeply} is thrown. Chosen to be far above any realistic intentional nesting,
+   * yet low enough to turn runaway recursion into a clear error instead of a {@link StackOverflowError}.
+   * Configurable via {@link Parameters#withMaxGenerationDepth}.
+   */
+  static final int DEFAULT_MAX_GENERATION_DEPTH = 1000;
+
+  /**
    * Checks that the given property returns {@code true} and doesn't throw exceptions by running the generator and the property
    * on random data repeatedly for some number of times. To customize the settings, invoke {@link #customized()} first.
    */
@@ -35,7 +43,7 @@ public class PropertyChecker {
    * @return a "parameters" object that where some checker settings can be changed 
    */
   public static Parameters customized() {
-    return new Parameters(new Random().nextLong(), null, iteration -> (iteration - 1) % DEFAULT_MAX_SIZE_HINT + 1, null, false, false, false);
+    return new Parameters(new Random().nextLong(), null, iteration -> (iteration - 1) % DEFAULT_MAX_SIZE_HINT + 1, null, false, false, false, DEFAULT_MAX_GENERATION_DEPTH);
   }
 
   @SuppressWarnings("UseOfSystemOutOrSystemErr")
@@ -47,8 +55,9 @@ public class PropertyChecker {
     final boolean silent;
     final boolean printValues;
     final boolean printData;
+    final int maxGenerationDepth;
 
-    Parameters(long globalSeed, @Nullable IntSource serializedData, IntUnaryOperator sizeHintFun, @Nullable Integer iterationCount, boolean silent, boolean printValues, boolean printData) {
+    Parameters(long globalSeed, @Nullable IntSource serializedData, IntUnaryOperator sizeHintFun, @Nullable Integer iterationCount, boolean silent, boolean printValues, boolean printData, int maxGenerationDepth) {
       this.globalSeed = globalSeed;
       this.serializedData = serializedData;
       this.sizeHintFun = sizeHintFun;
@@ -56,13 +65,14 @@ public class PropertyChecker {
       this.silent = silent;
       this.printValues = printValues;
       this.printData = printData;
+      this.maxGenerationDepth = maxGenerationDepth;
     }
 
     /**
      * This function allows starting the test with a fixed random seed. It's useful to reproduce some previous test, run and debug it.
      * @param seed A random seed to use for the first iteration.
      *             The following iterations will use other, pseudo-random seeds, but still derived from this one.
-     * @return this
+     * @return a modified copy of this Parameters object
      * @deprecated To catch your attention. It's fine to call this method during test debugging, but it should not be committed to version control
      * and used in regression tests, because any changes in the test itself or the framework can render the passed argument obsolete.
      * For regression testing, it's recommended to code the failing scenario explicitly.
@@ -74,12 +84,12 @@ public class PropertyChecker {
         return this;
       }
 
-      return new Parameters(seed, serializedData, sizeHintFun, iterationCount, silent, printValues, printData);
+      return new Parameters(seed, serializedData, sizeHintFun, iterationCount, silent, printValues, printData, maxGenerationDepth);
     }
 
     /**
      * @param iterationCount the number of iterations to try. By default, it's 100.
-     * @return this
+     * @return a modified copy of this Parameters object
      */
     public Parameters withIterationCount(int iterationCount) {
       if (serializedData != null) {
@@ -99,14 +109,14 @@ public class PropertyChecker {
 
     @NotNull
     private Parameters withForcedIterationCount(int iterationCount) {
-      return new Parameters(globalSeed, serializedData, sizeHintFun, iterationCount, silent, printValues, printData);
+      return new Parameters(globalSeed, serializedData, sizeHintFun, iterationCount, silent, printValues, printData, maxGenerationDepth);
     }
 
     /**
      * @param sizeHintFun a function determining how size hint should be distributed depending on the iteration number.
      *                    By default, the size hint will be 1 in the first iteration, 2 in the second one, and so on until 100,
      *                    then again 1,...,100,1,...,100, etc.
-     * @return this
+     * @return a modified copy of this Parameters object
      * @see GenerationEnvironment#getSizeHint()
      */
     public Parameters withSizeHint(@NotNull IntUnaryOperator sizeHintFun) {
@@ -115,28 +125,44 @@ public class PropertyChecker {
         return this;
       }
 
-      return new Parameters(globalSeed, serializedData, sizeHintFun, iterationCount, silent, printValues, printData);
+      return new Parameters(globalSeed, serializedData, sizeHintFun, iterationCount, silent, printValues, printData, maxGenerationDepth);
+    }
+
+    /**
+     * @param maxGenerationDepth the maximum number of levels a generator may recurse while producing a single value.
+     *                           When exceeded, {@link GeneratorRecursedTooDeeply} is thrown 
+     *                           instead of letting the JVM stack overflow. 
+     *                           The default is {@value #DEFAULT_MAX_GENERATION_DEPTH}.
+     *                           Raise it only if you legitimately generate deeply nested structures; 
+     *                           if you're hitting the limit by accident, the generator most
+     *                           likely recurses without an effective base case
+     *                           (see {@link Generator#recursive(java.util.function.Function)}).
+     * @return a modified copy of this Parameters object
+     */
+    public Parameters withMaxGenerationDepth(int maxGenerationDepth) {
+      if (maxGenerationDepth <= 0) throw new IllegalArgumentException("maxGenerationDepth must be positive: " + maxGenerationDepth);
+      return new Parameters(globalSeed, serializedData, sizeHintFun, iterationCount, silent, printValues, printData, maxGenerationDepth);
     }
 
     /**
      * Suppresses all output from the testing infrastructure during property check and test shrinking
-     * @return this
+     * @return a modified copy of this Parameters object
      */
     public Parameters silent() {
       if (printValues) throw new IllegalStateException("'silent' is incompatible with 'printGeneratedValues'");
       if (printData) throw new IllegalStateException("'silent' is incompatible with 'printRawData'");
-      return new Parameters(globalSeed, serializedData, sizeHintFun, iterationCount, true, printValues, printData);
+      return new Parameters(globalSeed, serializedData, sizeHintFun, iterationCount, true, printValues, printData, maxGenerationDepth);
     }
 
     /**
      * Enables a verbose mode, when for every execution of property checking all the generated values are printed to the STDOUT.
      * If a check fails, this is also printed. This can be useful to get an impression of how good the generators are, and for debugging purposes.
-     * @return this
+     * @return a modified copy of this Parameters object
      */
     @SuppressWarnings("unused")
     public Parameters printGeneratedValues() {
       if (silent) throw new IllegalStateException("'printGeneratedValues' is incompatible with 'silent'");
-      return new Parameters(globalSeed, serializedData, sizeHintFun, iterationCount, silent, true, printData);
+      return new Parameters(globalSeed, serializedData, sizeHintFun, iterationCount, silent, true, printData, maxGenerationDepth);
     }
 
     /**
@@ -146,7 +172,7 @@ public class PropertyChecker {
     @SuppressWarnings("unused")
     public Parameters printRawData() {
       if (silent) throw new IllegalStateException("'printRawData' is incompatible with 'silent'");
-      return new Parameters(globalSeed, serializedData, sizeHintFun, iterationCount, silent, printValues, true);
+      return new Parameters(globalSeed, serializedData, sizeHintFun, iterationCount, silent, printValues, true, maxGenerationDepth);
     }
 
     /**

@@ -65,7 +65,7 @@ class DataSerializer {
     int hint = readINT(stream);
     SerializedIntSource serializedData = new SerializedIntSource(stream);
     return new PropertyChecker.Parameters(globalSeed, serializedData, __ -> hint, 1,
-            parameters.silent, parameters.printValues, parameters.printData);
+            parameters.silent, parameters.printValues, parameters.printData, parameters.maxGenerationDepth);
   }
 
   @NotNull

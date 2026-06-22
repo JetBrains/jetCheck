@@ -3,6 +3,7 @@
  */
 package org.jetbrains.jetCheck;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,15 +32,28 @@ public class RecursiveGeneratorTest extends PropertyCheckerTestCase {
     checkShrinksToLeaf(Generator.recursive(nodes -> Generator.frequency(2, leaves,
                                                                         1, Generator.from(data -> data.generate(Generator.listsOf(nodes).map(Composite::new))))));
   }
-  
+
+  public void testUnboundedRecursionThrowsDescriptiveException() {
+    Generator<Node> infinite = Generator.recursive(
+            self -> Generator.from(data -> new Composite(Collections.singletonList(data.generate(self)))));
+    try {
+      PropertyChecker.customized().withMaxGenerationDepth(50).silent().forAll(infinite, n -> true);
+      fail("Expected the depth guard to fire");
+    }
+    catch (GeneratorException e) {
+      assertTrue("cause was " + e.getCause(), e.getCause() instanceof GeneratorRecursedTooDeeply);
+      assertEquals(50, ((GeneratorRecursedTooDeeply)e.getCause()).getDepth());
+    }
+  }
+
   private interface Node {}
-  
+
   private static class Leaf implements Node {
     final char c;
     Leaf(char c) { this.c = c;}
     public String toString() { return String.valueOf(c);}
   }
-  
+
   private static class Composite implements Node {
     final List<Node> children;
     Composite(List<Node> children) { this.children = children;}

@@ -58,7 +58,7 @@ class Iteration<T> {
         T value;
         try {
           IntSource source = session.parameters.serializedData != null ? session.parameters.serializedData : d -> d.generateInt(random);
-          value = session.generator.getGeneratorFunction().apply(new GenerativeDataStructure(source, node, sizeHint));
+          value = session.generator.getGeneratorFunction().apply(new GenerativeDataStructure(source, node, sizeHint, session.parameters.maxGenerationDepth));
         }
         catch (CannotSatisfyCondition e) {
           continue;

@@ -12,15 +12,19 @@ import java.util.function.Predicate;
 class GenerativeDataStructure extends AbstractDataStructure {
   private final CurrentData dataTracker;
   private final IntSource random;
+  private final int maxDepth;
+  private final int depth;
 
-  GenerativeDataStructure(IntSource random, StructureNode node, int sizeHint) {
-    this(null, random, node, sizeHint);
+  GenerativeDataStructure(IntSource random, StructureNode node, int sizeHint, int maxDepth) {
+    this(null, random, node, sizeHint, maxDepth, 0);
   }
 
-  private GenerativeDataStructure(@Nullable CurrentData dataTracker, IntSource random, StructureNode node, int sizeHint) {
+  private GenerativeDataStructure(@Nullable CurrentData dataTracker, IntSource random, StructureNode node, int sizeHint, int maxDepth, int depth) {
     super(node, sizeHint);
     this.random = random;
     this.dataTracker = dataTracker != null ? dataTracker : new CurrentData();
+    this.maxDepth = maxDepth;
+    this.depth = depth;
   }
 
   @Override
@@ -42,7 +46,11 @@ class GenerativeDataStructure extends AbstractDataStructure {
 
   @NotNull
   private GenerativeDataStructure subStructure(@NotNull Generator<?> generator, int childSizeHint) {
-    return new GenerativeDataStructure(dataTracker, random, node.subStructure(generator), childSizeHint);
+    int childDepth = depth + 1;
+    if (childDepth > maxDepth) {
+      throw new GeneratorRecursedTooDeeply(maxDepth);
+    }
+    return new GenerativeDataStructure(dataTracker, random, node.subStructure(generator), childSizeHint, maxDepth, childDepth);
   }
 
   @Override

@@ -183,6 +183,17 @@ public class Generator<T> {
   }
 
   /**
+   * Creates a generator that may refer to itself, for producing recursive (tree-like) data structures.
+   * The passed function receives a generator standing for "the same generator" (the self-reference) and should return
+   * a generator that uses it for the recursive positions.<p></p>
+   *
+   * <b>Termination is the caller's responsibility.</b> This combinator does <em>not</em> limit recursion depth: it merely
+   * wires up the self-reference. If the recursive alternatives are chosen so often that, on average, every generated node
+   * spawns more than one recursive child (a "supercritical" process), generation descends without bound and overflows the
+   * stack (reported as {@link GeneratorRecursedTooDeeply}). To guarantee termination, make the recursive branches rare enough
+   * (e.g. via small {@link #frequency} weights), or derive collection sizes from {@link GenerationEnvironment#getSizeHint()}
+   * (which shrinks with nesting) so that, on average, every node produces fewer than one recursive child.
+   *
    * @return the generator returned from the passed function
    */
   @NotNull
