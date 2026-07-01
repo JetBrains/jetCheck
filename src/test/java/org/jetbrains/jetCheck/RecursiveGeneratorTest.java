@@ -46,6 +46,20 @@ public class RecursiveGeneratorTest extends PropertyCheckerTestCase {
     }
   }
 
+  public void testRecursiveGeneratorCanFallBackToBaseAtLogSizeHintDepth() {
+    Generator<String> finite = Generator.<String>recursive(
+      self -> Generator.from(data -> "[" + data.generate(self) + "]"))
+      .withBase(Generator.constant("x"));
+
+    String[] generated = new String[1];
+    PropertyChecker.customized().withIterationCount(1).withSizeHint(iteration -> 8).silent().forAll(finite, value -> {
+      generated[0] = value;
+      return true;
+    });
+
+    assertEquals("[[[x]]]", generated[0]);
+  }
+
   private interface Node {}
 
   private static class Leaf implements Node {

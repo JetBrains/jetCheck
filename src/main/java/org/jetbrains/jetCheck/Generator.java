@@ -3,7 +3,6 @@ package org.jetbrains.jetCheck;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -187,21 +186,19 @@ public class Generator<T> {
    * The passed function receives a generator standing for "the same generator" (the self-reference) and should return
    * a generator that uses it for the recursive positions.<p></p>
    *
-   * <b>Termination is the caller's responsibility.</b> This combinator does <em>not</em> limit recursion depth: it merely
-   * wires up the self-reference. If the recursive alternatives are chosen so often that, on average, every generated node
-   * spawns more than one recursive child (a "supercritical" process), generation descends without bound and overflows the
-   * stack (reported as {@link GeneratorRecursedTooDeeply}). To guarantee termination, make the recursive branches rare enough
-   * (e.g. via small {@link #frequency} weights), or derive collection sizes from {@link GenerationEnvironment#getSizeHint()}
-   * (which shrinks with nesting) so that, on average, every node produces fewer than one recursive child.
+   * <b>Termination is the caller's responsibility unless {@link RecursiveGenerator#withBase(Generator)} is used.</b>
+   * By itself, this combinator does <em>not</em> limit recursion depth: it merely wires up the self-reference.
+   * If the recursive alternatives are chosen so often that, on average, every generated node spawns more than one recursive child
+   * (a "supercritical" process), generation descends without bound and overflows the stack (reported as {@link GeneratorRecursedTooDeeply}).
+   * To guarantee termination, make the recursive branches rare enough (e.g. via small {@link #frequency} weights),
+   * derive collection sizes from {@link GenerationEnvironment#getSizeHint()} (which shrinks with nesting)
+   * so that, on average, every node produces fewer than one recursive child, or use {@link RecursiveGenerator#withBase(Generator)}.
    *
    * @return the generator returned from the passed function
    */
   @NotNull
-  public static <T> Generator<T> recursive(@NotNull Function<? super Generator<T>, ? extends Generator<T>> createGenerator) {
-    AtomicReference<Generator<T>> ref = new AtomicReference<>();
-    Generator<T> result = from(data -> ref.get().getGeneratorFunction().apply(data));
-    ref.set(createGenerator.apply(result));
-    return result;
+  public static <T> RecursiveGenerator<T> recursive(@NotNull Function<? super Generator<T>, ? extends Generator<T>> createGenerator) {
+    return new RecursiveGenerator<>(createGenerator, null);
   }
 
   /** A generator that returns 'true' or 'false' */
