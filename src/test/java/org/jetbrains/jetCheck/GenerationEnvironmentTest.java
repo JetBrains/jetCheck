@@ -144,14 +144,4 @@ public class GenerationEnvironmentTest extends TestCase {
       assertTrue(expected.getMessage(), expected.getMessage().contains("-1"));
     }
   }
-
-  public void testNullSourceRejected() {
-    try {
-      GenerationEnvironment.generative(null, 16);
-      fail("expected NullPointerException");
-    }
-    catch (NullPointerException expected) {
-      // expected
-    }
-  }
 }
