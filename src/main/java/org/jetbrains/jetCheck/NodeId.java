@@ -18,6 +18,11 @@ class NodeId {
     this(new AtomicInteger(), generator);
   }
 
+  /** A root id not tied to any generator, for a data structure built outside {@link PropertyChecker}. */
+  NodeId() {
+    this(new AtomicInteger(), null);
+  }
+
   private NodeId(AtomicInteger counter, @Nullable Generator<?> generator) {
     this.counter = counter;
     this.generatorHash = generator == null ? null : generator.getGeneratorFunction().hashCode();
