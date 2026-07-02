@@ -35,10 +35,10 @@ You can add the *jetCheck* dependency to your project from Maven Central:
 <dependency>
     <groupId>org.jetbrains</groupId>
     <artifactId>jetCheck</artifactId>
-    <version>0.2.3</version>
+    <version>0.3.0</version>
 </dependency>
 ```
-Or `implementation("org.jetbrains:jetCheck:0.2.3")` in Gradle.
+Or `implementation("org.jetbrains:jetCheck:0.3.0")` in Gradle.
 
 Then, in your normal test method, whatever test framework you're using, call [PropertyChecker](src/main/java/org/jetbrains/jetCheck/PropertyChecker.java). Here's a simple example of a failing property:
 
